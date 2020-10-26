@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:id="@+id/main_container" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:paddingBottom="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_gravity="left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_Account"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:id="@+id/accountLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="5dp"/>
+                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_addNewFiled"/>
+                    <ImageView android:layout_gravity="center_horizontal" android:id="@+id/addAccountIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:src="@drawable/ic_next1"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_gravity="left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_LineofCredit"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:id="@+id/lineOfCreditsLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="5dp"/>
+                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_addNewFiled"/>
+                    <ImageView android:layout_gravity="center_horizontal" android:id="@+id/addLineOfCreditIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:src="@drawable/ic_next1"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_gravity="left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_CreditCards"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:id="@+id/creditCardLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="5dp"/>
+                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_addNewFiled"/>
+                    <ImageView android:layout_gravity="center_horizontal" android:id="@+id/addCreditCardIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:src="@drawable/ic_next1"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_gravity="left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_Wallet"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:id="@+id/walletLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="5dp"/>
+                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_addNewFiled"/>
+                    <ImageView android:layout_gravity="center_horizontal" android:id="@+id/addWalletIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:src="@drawable/ic_next1"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

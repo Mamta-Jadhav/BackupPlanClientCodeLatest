@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg"
+    android:orientation="vertical">
+
+    <include layout="@layout/actionbar_form" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/form_pading">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/menu_profile"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/hint_description"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <EditText
+                    android:id="@+id/edit_fullname"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_top"
+                    android:hint="@string/hint_fullname"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_address"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_phone"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_mobile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_mobile"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_birthplace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_birthplace"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_current_occupation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_current_occupation"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_sin_ssn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_bottom"
+                    android:hint="@string/hint_sin_ssn"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_parents"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_birth_mother"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input_top"
+                    android:hint="@string/hint_birth_mother"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_birth_Father"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_birth_father"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_step_mother"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_center"
+                    android:hint="@string/hint_step_mother"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+
+                <EditText
+                    android:id="@+id/edit_step_father"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_bottom"
+                    android:hint="@string/hint_step_father"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/txt_siblings"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/add_sibling_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_addNewFiled"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="normal" />
+
+                    <ImageView
+                        android:id="@+id/sibling_add_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_next1" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/txt_Married"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_SpousePartnerName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/hint_SpousePartnerName"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/txt_CommonLaw"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+                <EditText
+                    android:id="@+id/edit_CommonLaw"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/hint_PartnerName"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/button_material_light" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/form_marging_top"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/txt_Children"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.9"
+                        android:text="@string/txt_single_photo"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:id="@+id/addChildresnLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="5dp"
+                                android:text="@string/txt_addNewFiled"
+                                android:textAppearance="?android:attr/textAppearanceMedium"
+                                android:textColor="@android:color/black"
+                                android:textStyle="normal" />
+
+                            <ImageView
+                                android:id="@+id/childrenAddIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:src="@drawable/ic_next1" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_weight="0.9"
+                    android:text="@string/txt_photoOfDocument"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/form_marging_top"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_Passport"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgPassport"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_BirthCertificate"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgBirthCertificate"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txtSIN_SSN"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgSIN_SSN"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_ImmigrationPapers"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgImmigrationPapers"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_WillPowerAttorney"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgWillPowerAttorney"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_Trust"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgTrust"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_WarVeteranRecords"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgWarVeteranRecords"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_OrganDonationRecords"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgOrganDonationRecords"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_Married"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_MarriageCertificate"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgMarriageCertificate"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_PreMarriageAgreements"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgPreMarriageAgreements"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_Divorced"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_MaintenanceRecords"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgMaintenanceRecords"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_Alimony"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgAlimony"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_ChildCustodyRecords"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgChildCustodyRecords"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_DivorceDecreeCertificate"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgDivorceDecreeCertificate"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_SeparationAgreement"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgSeparationAgreement"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_Widowed"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_DeathCertificate"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgDeathCertificate"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="0.6"
+                        android:text="@string/txt_Will"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ImageView
+                        android:id="@+id/imgWill"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="0.4"
+                        android:contentDescription=""
+                        android:src="@drawable/img" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_Pets"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/petLayouts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/txt_addNewFiled"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="normal" />
+
+                    <ImageView
+                        android:id="@+id/petIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:src="@drawable/ic_next1" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

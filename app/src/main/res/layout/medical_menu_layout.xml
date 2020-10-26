@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:orientation="vertical" android:paddingBottom="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_marginBottom="10dp">
+                <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_medical_id" android:background="@drawable/bg_input_top" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="" android:hint="@string/hint_Doctor" android:singleLine="true"/>
+                <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_doctor" android:background="@drawable/bg_input_top" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Doctor" android:singleLine="true"/>
+                <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Location" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Location" android:singleLine="true"/>
+                <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_MedicalCard" android:background="@drawable/bg_input_bottom" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_MedicalCard" android:singleLine="true"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10dp">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_Appointments"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:id="@+id/layout_appointment" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:layout_marginBottom="20dp">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_addNewFiled"/>
+                <ImageView android:layout_gravity="center_horizontal" android:id="@+id/addAppointmentIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:src="@drawable/ic_next1"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:layout_marginBottom="20dp">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/medical_tip1"/>
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/medical_tip2"/>
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/medical_tip3"/>
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textStyle="normal" android:textColor="@android:color/black" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_marginBottom="10dp" android:text="@string/medical_tip4"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

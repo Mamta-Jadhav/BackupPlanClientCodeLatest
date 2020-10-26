@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+        <ImageView android:layout_gravity="right" android:id="@+id/removeIcon" android:tag="" android:paddingBottom="5dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="5dp" android:src="@drawable/ic_close1"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/editAutoId" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/editVehical" android:background="@drawable/bg_input_top" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_VehicleMake" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/editModel" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Model" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edityear" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Year" android:singleLine="true"/>
+        <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input_bottom" android:padding="5dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/hint_PhotoOfPolicy" android:layout_weight="1"/>
+            <ToggleButton android:layout_gravity="center_vertical" android:id="@+id/isPolicy" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:textOn="@null" android:textOff="@null"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
+        <ImageView android:id="@+id/imgPolicy" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/img" android:contentDescription=""/>
+    </LinearLayout>
+</LinearLayout>

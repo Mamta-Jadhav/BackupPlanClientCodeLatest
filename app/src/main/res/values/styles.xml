@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="dialog_theme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="dialog_animation_fade">
+        <item name="android:windowEnterAnimation">@anim/modal_in</item>
+        <item name="android:windowExitAnimation">@anim/modal_out</item>
+    </style>
+
+</resources>

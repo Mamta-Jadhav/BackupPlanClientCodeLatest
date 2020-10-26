@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <RelativeLayout android:background="@drawable/bg_header" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/white" android:id="@+id/actionBarTittle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/menu_upgrade" android:layout_centerHorizontal="true" android:layout_centerVertical="true"/>
+        <Button android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/white" android:gravity="center" android:id="@+id/btn_back" android:background="@drawable/btn_back" android:paddingLeft="5dp" android:layout_width="60dp" android:layout_height="30dp" android:text="@string/btn_back" android:layout_alignParentLeft="true" android:layout_alignParentTop="true"/>
+    </RelativeLayout>
+</LinearLayout>

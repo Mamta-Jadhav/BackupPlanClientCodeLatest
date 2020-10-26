@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="20dp">
+    <LinearLayout android:orientation="vertical" android:id="@+id/walletFieldLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+        <ImageView android:layout_gravity="right" android:id="@+id/removeWalletIcon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:src="@drawable/ic_close1"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_walltet_id" android:background="@drawable/bg_input_top" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Card" android:background="@drawable/bg_input" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Card" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Number" android:background="@drawable/bg_input_bottom" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Number" android:singleLine="true"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
+        <ImageView android:id="@+id/imgWallet" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/img" android:contentDescription=""/>
+    </LinearLayout>
+</LinearLayout>

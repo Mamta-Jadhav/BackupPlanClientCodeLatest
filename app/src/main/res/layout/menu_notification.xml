@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
+            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/notificatoin_text" android:layout_weight="1"/>
+                <ToggleButton android:id="@+id/isNotificaion" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

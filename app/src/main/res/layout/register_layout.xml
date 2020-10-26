@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:gravity="center" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent">
+        <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:textStyle="bold" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="30dp" android:text="@string/btn_register"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/edit_username" android:background="@drawable/bg_input_top" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/hint_username" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/edit_emaild" android:background="@drawable/bg_input_center" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/hint_email" android:singleLine="true"/>
+        <EditText android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/edit_password" android:background="@drawable/bg_input_bottom" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/hint_password" android:singleLine="true" android:inputType="textPassword"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <Button android:textColor="@android:color/white" android:id="@+id/btn_register" android:background="@drawable/btn_change_pass" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/btn_register"/>
+        <TextView android:textColor="@android:color/black" android:id="@+id/tv_skip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/txt_skip"/>
+    </LinearLayout>
+</RelativeLayout>

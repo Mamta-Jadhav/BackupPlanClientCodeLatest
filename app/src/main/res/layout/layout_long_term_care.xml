@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent" android:animateLayoutChanges="true">
+    <include layout="@layout/actionbar_form"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_wills_id" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true"/>
+            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_LongTermCare" android:layout_weight="1"/>
+                <ToggleButton android:id="@+id/yesNoLongTermCare" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+            </LinearLayout>
+            <HorizontalScrollView android:id="@+id/sv" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:layout_marginBottom="5dp">
+                <LinearLayout android:orientation="horizontal" android:id="@+id/layout_images" android:layout_width="wrap_content" android:layout_height="wrap_content" android:animateLayoutChanges="true"/>
+            </HorizontalScrollView>
+            <LinearLayout android:orientation="vertical" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:id="@+id/tv_tip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tip_longTerm" android:layout_weight="1"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_upgrade"/>
+    <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@+id/layoutPlan1" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Paid features" style="@style/TextAppearance.AppCompat.Medium"/>
+        <TextView android:textColor="@android:color/darker_gray" android:id="@+id/tvPlanPrice1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Rs3,100" style="@style/TextAppearance.AppCompat.Medium"/>
+    </LinearLayout>
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@+id/layout_purchased" android:padding="10dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="You have already purchased the premium version." style="@style/TextAppearance.AppCompat.Medium"/>
+    </LinearLayout>
+    <View android:background="@android:color/darker_gray" android:layout_width="match_parent" android:layout_height="1dp"/>
+    <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@+id/layoutPlan2" android:padding="10dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Two Year Subscription" style="@style/TextAppearance.AppCompat.Medium"/>
+        <TextView android:textColor="@android:color/darker_gray" android:id="@+id/tvPlanPrice2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="Rs5,000" style="@style/TextAppearance.AppCompat.Medium"/>
+    </LinearLayout>
+</LinearLayout>

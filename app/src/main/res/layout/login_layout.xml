@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:gravity="center" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@+id/footer">
+        <LinearLayout android:layout_gravity="center_vertical" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@+id/linearLayout1" android:layout_width="match_parent" android:layout_height="match_parent">
+                <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:textStyle="bold" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="30dp" android:text="@string/btn_login"/>
+                <EditText android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/edit_username" android:background="@drawable/bg_input_top" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/hint_username" android:singleLine="true" android:inputType="text" android:imeOptions="actionNext"/>
+                <EditText android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/edit_password" android:background="@drawable/bg_input_bottom" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="@string/hint_password" android:singleLine="true" android:inputType="textPassword" android:imeOptions="actionDone"/>
+                <Button android:textColor="@android:color/white" android:id="@+id/btn_login" android:background="@drawable/btn_change_pass" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/btn_login"/>
+                <TextView android:textColor="@android:color/black" android:id="@+id/tv_register" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/btn_register"/>
+                <TextView android:textColor="@android:color/black" android:id="@+id/tv_forgotPassword" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/btn_forgotPassword"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+    <RelativeLayout android:id="@+id/footer" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:layout_alignParentBottom="true">
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textColor="@android:color/black" android:id="@+id/tv_guest_user" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:text="@string/btn_loging"/>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

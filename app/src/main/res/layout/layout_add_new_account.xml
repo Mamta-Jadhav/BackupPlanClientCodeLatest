@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:gravity="center" android:orientation="vertical" android:background="#8c000000" android:layout_width="match_parent" android:layout_height="match_parent" android:onClick="onAddNewAccountLayoutClick">
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:background="@drawable/bg" android:paddingLeft="20dp" android:paddingRight="20dp" android:layout_width="match_parent" android:layout_height="200dp">
+        <TextView android:textStyle="bold" android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add New Account." style="@style/Base.TextAppearance.AppCompat.Large"/>
+        <EditText android:textColor="@android:color/black" android:gravity="center_vertical" android:id="@+id/txt_acc_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:hint="Enter New Account Name" android:inputType="text" android:imeOptions="actionDone" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+        <Button android:textStyle="bold" android:textColor="@android:color/white" android:id="@+id/btn_add_new_acc" android:background="@android:color/black" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="10dp" android:text="Add" android:onClick="onAddNewSocialAccount" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+    </LinearLayout>
+</LinearLayout>

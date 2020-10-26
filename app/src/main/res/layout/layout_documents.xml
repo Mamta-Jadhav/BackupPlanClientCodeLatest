@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/bg"
+    android:orientation="vertical">
+
+    <include layout="@layout/actionbar_form" />
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_BIRTH_CERTIFICATES"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_BirthCertificate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_brith_certificate"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_SOCIAL_SECURITY_OR_SIN"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_SOCIAL_SECURITY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_SOCIAL_SECURITY"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_MARRIAGE_CERTIFICATE"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_MARRIAGE_CERTIFICATE"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_MARRIAGE_CERTIFICATE"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_PASSPORTS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_PASSPORTS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_PASSPORTS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_PRE_MARRIAGE_AGREEMENTS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_PRE_MARRIAGE_AGREEMENTS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_PRE_MARRIAGE_AGREEMENTS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_NEXUS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_NEXUS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_NEXUS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_CITIZENSHIP_PAPERS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_CITIZENSHIP_PAPERS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_CITIZENSHIP_PAPERS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_ALIMONY"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_ALIMONY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_ALIMONY"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_MAINTENANCE"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_MAINTENANCE"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_MAINTENANCE"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_CUSTODY_ORDERS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_CUSTODY_ORDERS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_CUSTODY_ORDERS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_IMMIGRATION_PAPERS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_IMMIGRATION_PAPERS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_IMMIGRATION_PAPERS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_DIVORCE_DECREE"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_DIVORCE_DECREE"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_DIVORCE_DECREE"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_SEPARATION_AGREEMENT"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_SEPARATION_AGREEMENT"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_SEPARATION_AGREEMENT"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_CEMETERY_OR_MAUSOLEUM_DEEDS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_CEMETERY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_CEMETERY"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_PRE_PAID_FUNERAL_ARRANGEMENTS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNoFUNERAL_ARRANGEMENTS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_FUNERAL_ARRANGEMENTS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_WAR_VETERAN_RECORDS"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_WAR_VETERAN_RECORDS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_WAR_VETERAN_RECORDS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_YOUR_WALLET_CARDS_COPY_ALL_CARDS_IN_YOUR_WALLET"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_YOUR_WALLTE_COPY"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_YOUR_WALLTE_COPY"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:text="@string/txt_YOUR_KEYS_LABEL_TAKE_PICTURE"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@android:color/black" />
+
+                    <ToggleButton
+                        android:id="@+id/yesNo_YOUR_KEYS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/toggle_selector"
+                        android:checked="true"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/img_YOUR_KEYS"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_SAFETY_DEPOSIT_BOX"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_ketLocationBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/txt_Key_Location"
+                    android:padding="5dp"
+                    android:singleLine="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_Registration_record"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_registrationRecord"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input_top"
+                    android:hint="@string/txt_Key_Location"
+                    android:padding="5dp"
+                    android:singleLine="true" />
+
+                <EditText
+                    android:id="@+id/edit_3rdparty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_bottom"
+                    android:hint="@string/txt_3rd_Party_Access"
+                    android:padding="5dp"
+                    android:singleLine="true" />
+
+                <ImageView
+                    android:id="@+id/img_RegistrationRecord"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_FIRE_PROOF_SAFE"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/edit_PROF_SAFE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/txt_Location"
+                    android:padding="5dp"
+                    android:singleLine="true" />
+
+                <ImageView
+                    android:id="@+id/img_PROOF_SAFE"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="5dp"
+                    android:contentDescription=""
+                    android:src="@drawable/img" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

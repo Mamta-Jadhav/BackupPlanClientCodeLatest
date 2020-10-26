@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <LinearLayout android:orientation="vertical" android:paddingBottom="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <EditText android:textColor="@android:color/black" android:id="@+id/editSearchContact" android:background="@drawable/bg_input" android:padding="5dp" android:layout_width="0dp" android:layout_height="wrap_content" android:hint="@string/hint_search" android:ems="10" android:layout_weight="1" android:inputType="textPersonName"/>
+        </LinearLayout>
+        <LinearLayout android:gravity="right" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
+            <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:id="@+id/tv_contactName" android:layout_width="0dp" android:layout_height="wrap_content" android:text="Select All" android:layout_weight="1"/>
+            <CheckBox android:layout_gravity="center_vertical" android:id="@+id/chkSelectAll" android:padding="5dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:button="@null" android:drawableLeft="@drawable/checkbox_selector" android:drawablePadding="5dp"/>
+        </LinearLayout>
+        <LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
+            <ListView android:id="@+id/lvContacts" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:cacheColorHint="@android:color/transparent" android:dividerHeight="0dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

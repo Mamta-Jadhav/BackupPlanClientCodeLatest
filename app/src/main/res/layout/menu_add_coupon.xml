@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:id="@+id/layout_show_coupon" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="20dp" android:layout_marginTop="10dp" android:layout_marginRight="20dp" android:layout_marginBottom="20dp">
+            <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Coupon Code:"/>
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/black" android:gravity="center" android:id="@+id/tv_coupon_code" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:hint="CODE"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Coupon Expiry:"/>
+                <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/black" android:gravity="center" android:id="@+id/tv_coupon_expiry" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:hint="Expiry"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@+id/layout_add_coupon" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="20dp" android:layout_marginTop="10dp" android:layout_marginRight="20dp" android:layout_marginBottom="20dp">
+            <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="You can access the paid features of app depends on the coupon code."/>
+            <EditText android:textColor="@android:color/black" android:gravity="center_vertical" android:id="@+id/txt_coupon_code" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:hint="Enter your coupon code" android:inputType="text" android:imeOptions="actionDone" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+            <Button android:textColor="@android:color/white" android:id="@+id/btn_add" android:background="@android:color/black" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="20dp" android:text="Add" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

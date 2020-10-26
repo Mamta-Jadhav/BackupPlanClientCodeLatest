@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:gravity="center" android:orientation="vertical" android:background="#aa000000" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:background="@android:color/white" android:paddingLeft="20dp" android:paddingTop="20dp" android:paddingRight="20dp" android:layout_width="match_parent" android:layout_height="240dp">
+        <TextView android:textColor="@android:color/black" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="We have sent you an access Code for verification via Email check your inbox." style="@style/Base.TextAppearance.AppCompat.Medium"/>
+        <EditText android:textSize="26sp" android:textStyle="bold" android:textColor="@android:color/white" android:gravity="center" android:id="@+id/txt_pin" android:background="#dec797" android:layout_width="match_parent" android:layout_height="46dp" android:layout_marginTop="10dp" android:hint="XXXX" android:maxLength="4" android:inputType="number" android:imeOptions="actionDone" style="@style/Base.TextAppearance.AppCompat.Large"/>
+        <Button android:textColor="@android:color/white" android:id="@+id/btn_verify" android:background="@android:color/black" android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="10dp" android:text="Verify" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+        <TextView android:textColor="@android:color/holo_red_dark" android:id="@+id/tv_cancel" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancel" style="@style/Base.TextAppearance.AppCompat.Medium"/>
+    </LinearLayout>
+</LinearLayout>

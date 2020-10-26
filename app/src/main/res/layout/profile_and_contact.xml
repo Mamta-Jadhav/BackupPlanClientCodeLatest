@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent">
+    <include layout="@layout/actionbar_form"/>
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+            <LinearLayout android:orientation="horizontal" android:id="@+id/menu_profile" android:padding="@dimen/menu_space" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="center" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.2">
+                    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_profile"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.7">
+                    <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/menu_profile" android:singleLine="true"/>
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/white" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_entries" android:singleLine="true"/>
+                </LinearLayout>
+                <LinearLayout android:gravity="center" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.1">
+                    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_next"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_gravity="right" android:background="@drawable/bg_sepreter" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/line_right_margin"/>
+            <LinearLayout android:orientation="horizontal" android:id="@+id/menu_contact" android:padding="@dimen/menu_space" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="center" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.2">
+                    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_contact"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.7">
+                    <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:textColor="@android:color/black" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/menu_contacts" android:singleLine="true"/>
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/white" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_entries" android:singleLine="true"/>
+                </LinearLayout>
+                <LinearLayout android:gravity="center" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.1">
+                    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_next"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:padding="@dimen/menu_space" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="center" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.2">
+                    <ImageView android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_contact"/>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.7">
+                    <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/menu_contacts" android:singleLine="true"/>
+                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="@android:color/white" android:id="@+id/contact_entry" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_entries" android:singleLine="true"/>
+                </LinearLayout>
+                <LinearLayout android:gravity="center" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.1">
+                    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_next"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_gravity="right" android:background="@drawable/bg_sepreter" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/line_right_margin"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
