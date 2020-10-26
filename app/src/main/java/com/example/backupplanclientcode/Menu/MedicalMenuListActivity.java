@@ -31,10 +31,12 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
@@ -53,7 +55,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MedicalMenuListActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MedicalMenuListActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     ImageView addAppointmentIcon;
@@ -113,28 +118,28 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
     }
 
     private void checkAlreadySaveinvestment() {
-        if (this.pref.getStringValue(Constant.medical_id, "").equalsIgnoreCase("0") ||this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+//        if (this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
         this.actionBarTittle.setText(getResources().getString(R.string.menu_medical));
         addAppointmentlayout();
         return;
-        }
-        this.btn_save.setText("Edit");
-        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
-        }
-        if (this.connection.isConnectingToInternet()) {
-           try {
-               JSONObject nameValuePair = new JSONObject();
-               nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-               nameValuePair.put("medical_id",this.pref.getStringValue(Constant.medical_id, "1"));
-               nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-               new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
-           }catch(Exception e){
-
-           }
-            return;
-        }
-        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
+//        }
+//        this.btn_save.setText("Edit");
+//        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+//            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
+//        }
+//        if (this.connection.isConnectingToInternet()) {
+//           try {
+//               JSONObject nameValuePair = new JSONObject();
+//               nameValuePair.put("user_id", "2"); //this.pref.getStringValue(Constant.user_id, ""));
+//               nameValuePair.put("medical_id","1");// this.pref.getStringValue(Constant.medical_id, "1"));
+//               nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+//               new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
+//           }catch(Exception e){
+//
+//           }
+//            return;
+//        }
+//        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
     }
 
     public void onClick(View v) {
@@ -158,7 +163,7 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             JSONArray jsonArray = new JSONArray();
             JSONObject appointJson = new JSONObject();
-            appointJson.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+            appointJson.put("user_id", "23");//this.pref.getStringValue(Constant.user_id, ""));
             appointJson.put("delete_appoimment", this.delete_appoimment);
             appointJson.put("m_doctor", this.edit_doctor.getText().toString().trim());
             appointJson.put("m_location", this.edit_Location.getText().toString().trim());
@@ -490,6 +495,73 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

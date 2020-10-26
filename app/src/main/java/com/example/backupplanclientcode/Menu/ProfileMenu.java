@@ -29,10 +29,12 @@ import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.CustomeFiledActivity;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.File;
@@ -50,7 +52,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ProfileMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class ProfileMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_IMAGE = 4;
     private static final int SELECT_PICTURE = 2;
     private static final int SELECT_SIBLING = 3;
@@ -139,7 +144,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             customFiled.add(getResources().getString(R.string.hint_sister));
             addSiblingLayout(this.siblingCount, customFiled, 3);
             addPetSLayout(this.petlayoutCount);
-        } else if (this.pref.getStringValue(Constant.profile_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.profile_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        } else if (this.pref.getStringValue(Constant.profile_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.actionBarTittle.setText(getResources().getString(R.string.menu_profile));
             ADDParentToLayout(true);
             ArrayList<String> customFiled2 = new ArrayList<>();
@@ -151,7 +156,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             try {
                 JSONObject nameValuePairs = new JSONObject();
 //                nameValuePairs.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
-                nameValuePairs.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePairs.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_profile_detail, nameValuePairs, 2, "post").execute(new Void[0]);
                 this.btn_save.setText("Save");
@@ -642,8 +647,6 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
         try {
             MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             multipartEntity.addPart("json_data", new StringBody(this.json_profile.toString()));
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("json_data", this.json_profile.toString()));
             Log.i("Send Json data", this.json_profile.toString());
             for (int i = 0; i < this.list_images.size(); i++) {
                 File file = new File((String) ((HashMap) this.list_images.get(i)).get("image_path"));
@@ -727,10 +730,10 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             if (!this.connection.isConnectingToInternet()) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("save")) {
-                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.save_profile, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.edit_profile, multipartEntity);
                 saveProfileAsytask.execute(new Void[0]);
             } else {
-                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.edit_profile, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.save_profile, multipartEntity);
                 saveProfileAsytask2.execute(new Void[0]);
             }
         } catch (Exception e) {
@@ -753,11 +756,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 jobj.put("user_id", this.pref.getStringValue(Constant.user_id, "").toString());
                 jobj.put("p_full_name", this.edit_fullname.getText().toString().trim());
                 jobj.put("p_address", this.edit_address.getText().toString().trim());
-                if (this.pref.getStringValue(Constant.profile_id, "") != "0" && this.pref.getStringValue(Constant.profile_id, "") != "") {
-                    jobj.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
-                } else {
-                    jobj.put("profile_id", "");
-                }
+                jobj.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
                 jobj.put("p_phone", this.edit_phone.getText().toString().trim());
                 jobj.put("p_mobile", this.edit_mobile.getText().toString().trim());
                 jobj.put("p_birth_place", this.edit_birthplace.getText().toString().trim());
@@ -864,9 +863,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 }
             }
             if (response.getString("success").toString().trim().equalsIgnoreCase("1")) {
-//                showBackupConfirmation();
-//                displayMessage(response.getString("message").toString());
-                finish();
+                showBackupConfirmation();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -876,8 +873,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
     @SuppressLint({"InflateParams"})
     public void on_GeneralSuccess(JSONObject response, int responseCode) {
         try {
-            JSONObject json1 = response.getJSONObject("profile");
-            JSONObject json = json1.getJSONArray("profile").getJSONObject(0);
+            JSONObject json = response.getJSONObject("profile");
             this.edit_fullname.setText(json.getString("p_full_name"));
             this.edit_address.setText(json.getString("p_address"));
             this.edit_phone.setText(json.getString("p_phone"));
@@ -891,7 +887,26 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             this.edit_step_father.setText(json.getString("p_step_father"));
             this.edit_SpousePartnerName.setText(json.getString("p_partner_name"));
             this.edit_CommonLaw.setText(json.getString("p_partner_law"));
-            JSONArray sibling = response.getJSONObject("sibling").getJSONArray("sibling");
+            JSONObject relationship = json.getJSONObject("relationship");
+            this.relationship_id = relationship.getString("relationship_id").toString();
+            UrlImageViewHelper.setUrlDrawable(this.imgPassport, relationship.getString("s_passport").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgBirthCertificate, relationship.getString("s_birth_certi").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgSIN_SSN, relationship.getString("s_ssn").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgImmigrationPapers, relationship.getString("s_citizen_paper").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgWillPowerAttorney, relationship.getString("s_power_attorney").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgTrust, relationship.getString("s_trust").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgWarVeteranRecords, relationship.getString("s_war_record").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgOrganDonationRecords, relationship.getString("s_donation_rec").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgMarriageCertificate, relationship.getString("m_marriege_certi").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgPreMarriageAgreements, relationship.getString("m_marriege_agree").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgMaintenanceRecords, relationship.getString("d_maintenance_rec").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgAlimony, relationship.getString("d_alimony").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgChildCustodyRecords, relationship.getString("d_child_custody").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgDivorceDecreeCertificate, relationship.getString("d_divorce_certi").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgSeparationAgreement, relationship.getString("d_sepration_agree").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgDeathCertificate, relationship.getString("w_death_certi").toString(), (int) R.drawable.img);
+            UrlImageViewHelper.setUrlDrawable(this.imgWill, relationship.getString("w_will").toString(), (int) R.drawable.img);
+            JSONArray sibling = json.getJSONArray("sibling");
             if (sibling.length() <= 1) {
                 ArrayList<String> customFiled = new ArrayList<>();
                 customFiled.add(getResources().getString(R.string.hint_brother));
@@ -942,7 +957,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                     this.siblingCount++;
                 }
             }
-            JSONArray childrenJsonArray = response.getJSONObject("children").getJSONArray("children");
+            JSONArray childrenJsonArray = json.getJSONArray("children");
             if (childrenJsonArray.length() <= 1) {
                 ADDParentToLayout(true);
             } else {
@@ -1028,7 +1043,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                     this.child_images_count++;
                 }
             }
-            JSONArray pet = response.getJSONObject("pet").getJSONArray("pet");
+            JSONArray pet = json.getJSONArray("pet");
             if (pet.length() <= 1) {
                 addPetSLayout(this.petlayoutCount);
                 this.petlayoutCount++;
@@ -1075,26 +1090,6 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 }
                 this.petLayouts.addView(view7);
             }
-            JSONObject relationship = json.getJSONObject("relationship");
-            this.relationship_id = relationship.getString("relationship_id").toString();
-            UrlImageViewHelper.setUrlDrawable(this.imgPassport, relationship.getString("s_passport").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgBirthCertificate, relationship.getString("s_birth_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgSIN_SSN, relationship.getString("s_ssn").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgImmigrationPapers, relationship.getString("s_citizen_paper").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWillPowerAttorney, relationship.getString("s_power_attorney").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgTrust, relationship.getString("s_trust").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWarVeteranRecords, relationship.getString("s_war_record").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgOrganDonationRecords, relationship.getString("s_donation_rec").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgMarriageCertificate, relationship.getString("m_marriege_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgPreMarriageAgreements, relationship.getString("m_marriege_agree").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgMaintenanceRecords, relationship.getString("d_maintenance_rec").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgAlimony, relationship.getString("d_alimony").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgChildCustodyRecords, relationship.getString("d_child_custody").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgDivorceDecreeCertificate, relationship.getString("d_divorce_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgSeparationAgreement, relationship.getString("d_sepration_agree").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgDeathCertificate, relationship.getString("w_death_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWill, relationship.getString("w_will").toString(), (int) R.drawable.img);
-
         } catch (Exception e) {
             ADDParentToLayout(true);
             ArrayList<String> customFiled2 = new ArrayList<>();
@@ -1118,5 +1113,72 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 ProfileMenu.this.finish();
             }
         }).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 }

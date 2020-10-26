@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import com.example.backupplanclientcode.Asyntask.GeneralTask;
 import com.example.backupplanclientcode.Asyntask.GeneralTask.ResponseListener_General;
 import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask;
@@ -24,16 +23,16 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.http.NameValuePair;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -42,7 +41,10 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-public class DocumentsMenu extends Activity implements OnClickListener, ResponseListener_General, ResponseListerProfile {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class DocumentsMenu extends Activity implements OnClickListener, ResponseListener_General, ResponseListerProfile, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     Button btn_back;
@@ -160,21 +162,20 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
     }
 
     private void check_documentAlredy() {
-        Log.d("test", "Doc Id : " + pref.getStringValue(Constant.document_id, ""));
         if (!this.connection.isConnectingToInternet()) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
-        } else if (!this.pref.getStringValue(Constant.document_id, "").equalsIgnoreCase("") && !this.pref.getStringValue(Constant.document_id, "").equalsIgnoreCase("0")) {
+        } else if (!this.pref.getStringValue(Constant.document_id, "").equalsIgnoreCase("")) {
             this.btn_save.setText("Edit");
             if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_documents));
             }
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-                nameValuePair.put("document_id", this.pref.getStringValue(Constant.document_id, ""));
+                nameValuePair.put("user_id", "2");// this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("document_id", "2");// this.pref.getStringValue(Constant.document_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_document_detail, nameValuePair, 1, "post").execute(new Void[0]);
-            } catch (Exception e) {
+            }catch (Exception e){
 
             }
         } else {
@@ -836,15 +837,11 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("document_id", this.pref.getStringValue(Constant.document_id, ""));
                 sendJsonOBj.put("document_data", this.document_data);
                 entity.addPart("json_data", new StringBody(sendJsonOBj.toString()));
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-                nameValuePairs.add(new BasicNameValuePair("json_data", sendJsonOBj.toString()));
-                new SaveProfileAsytask(this, ServiceUrl.edit_document, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_document, entity).execute(new Void[0]);
             } else {
                 sendJsonOBj.put("document_data", this.document_data);
                 entity.addPart("json_data", new StringBody(sendJsonOBj.toString()));
-                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-                nameValuePairs.add(new BasicNameValuePair("json_data", sendJsonOBj.toString()));
-                new SaveProfileAsytask(this, ServiceUrl.save_document, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_document, entity).execute(new Void[0]);
             }
             Log.e("SEND OBJ", sendJsonOBj.toString());
         } catch (Exception e) {
@@ -863,8 +860,6 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 Toast.makeText(getApplicationContext(), "Something wrong", Toast.LENGTH_SHORT).show();
             }
             if (response.has("success") && response.getString("success").toString().trim().equalsIgnoreCase("1")) {
-                this.pref.setStringValue(Constant.document_id, response.getString("document_id"));
-                this.pref.setStringValue(Constant.document_flag,"1");
                 finish();
             }
         } catch (Exception e) {
@@ -1104,6 +1099,73 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

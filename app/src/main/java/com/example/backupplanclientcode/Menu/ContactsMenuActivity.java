@@ -27,9 +27,11 @@ import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.Contact.ContactListActivity;
 import com.example.backupplanclientcode.Database.DBHelper;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -58,7 +60,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ContactsMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class ContactsMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     TextView actionBarTittle;
     LinearLayout addContactForphone;
     LinearLayout addContacts;
@@ -110,7 +115,7 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
                 this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_contacts));
                 try {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));//23
+                    nameValuePair.put("user_id", "23");//this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_contact_detail, nameValuePair, 2, "post").execute(new Void[0]);
                 } catch (Exception e) {
@@ -201,7 +206,7 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
                 jsonbj2.put("contact_number", edit_contact2.getText().toString().trim());
                 contact.put(jsonbj2);
             }
-            contact_data.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+            contact_data.put("user_id", "23");//this.pref.getStringValue(Constant.user_id, ""));
             contact_data.put("delete_contact", this.delete_contact);
             contact_data.put("contact", contact);
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -328,6 +333,73 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
                 // TODO Auto-generated catch block
             }
             return null;
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

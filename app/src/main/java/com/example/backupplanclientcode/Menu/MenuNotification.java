@@ -1,7 +1,9 @@
 package com.example.backupplanclientcode.Menu;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -13,12 +15,13 @@ import android.widget.ToggleButton;
 
 import com.example.backupplanclientcode.Asyntask.GeneralTask;
 import com.example.backupplanclientcode.Asyntask.GeneralTask.ResponseListener_General;
-import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask;
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
+import com.example.backupplanclientcode.loginActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +30,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-public class MenuNotification extends Activity implements ResponseListener_General, SaveProfileAsytask.ResponseListerProfile {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MenuNotification extends Activity implements ResponseListener_General, LogOutTimerUtil.LogOutListener {
     TextView actionBarTittle;
     Button btn_back;
     Button btn_save;
@@ -51,23 +57,14 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
         this.isNotificaion.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-                    nameValuePairs.add(new BasicNameValuePair("user_id", "23"));
+                    JSONObject nameValuePair = new JSONObject();
+                    nameValuePair.put("user_id", MenuNotification.this.pref.getStringValue(Constant.user_id, ""));
                     if (isChecked) {
-                        nameValuePairs.add(new BasicNameValuePair("notification_flag", "1"));
+                        nameValuePair.put("notification_flag", "1");
                     } else {
-                        nameValuePairs.add(new BasicNameValuePair("notification_flag", "0"));
+                        nameValuePair.put("notification_flag", "0");
                     }
-                    new SaveProfileAsytask(MenuNotification.this, ServiceUrl.save_notification, nameValuePairs).execute(new Void[0]);
-
-//                    JSONObject nameValuePair = new JSONObject();
-//                    nameValuePair.put("user_id", MenuNotification.this.pref.getStringValue(Constant.user_id, ""));
-//                    if (isChecked) {
-//                        nameValuePair.put("notification_flag", "1");
-//                    } else {
-//                        nameValuePair.put("notification_flag", "0");
-//                    }
-//                    new GeneralTask(MenuNotification.this, ServiceUrl.save_notification, nameValuePair, 1, "post").execute(new Void[0]);
+                    new GeneralTask(MenuNotification.this, ServiceUrl.save_notification, nameValuePair, 1, "post").execute(new Void[0]);
                 } catch (Exception e) {
                 }
             }
@@ -100,20 +97,69 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
     }
 
     @Override
-    public void on_ProfileSuccess(JSONObject jSONObject) {
-        try {
-            if (jSONObject.getString("success").equalsIgnoreCase("1")) {
-                if (jSONObject.has("notification_flag")) {
-                    if (jSONObject.getString("notification_flag").equalsIgnoreCase("1")) {
-                        this.pref.setBooleanValue(Constant.isNotification, true);
-                    } else {
-                        this.pref.setBooleanValue(Constant.isNotification, false);
-                    }
-                }
-                Toast.makeText(getApplicationContext(), jSONObject.getString("message"), Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

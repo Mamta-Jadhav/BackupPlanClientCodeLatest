@@ -30,6 +30,9 @@ public class YourBackupPlanApp extends Application {
     Locale locale;
     ProgressDialog mProgressDialog;
 
+    public static String isInBackground = "false";
+    public static String isInForeground = "false";
+
     /* renamed from: mp */
     SettingPreference f58mp;
 

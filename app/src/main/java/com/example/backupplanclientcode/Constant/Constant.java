@@ -14,7 +14,6 @@ public class Constant {
     public static String contactFlag = "contactFlag";
     public static String coupon = Param.COUPON;
     public static String document_id = "document_id";
-    public static String document_flag = "document_flag";
     public static String emergencyFlag = "emergencyFlag";
     public static String employer_id = "employer_id";
     public static String insurance_id = "insurance_id";

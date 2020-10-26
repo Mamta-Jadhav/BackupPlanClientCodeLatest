@@ -17,16 +17,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.List;
 
 public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
@@ -34,7 +30,6 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
     Activity context;
     SettingPreference pref;
     List<NameValuePair> entity;
-    MultipartEntity entity2;
 
     /* renamed from: jo */
     JSONObject f36jo;
@@ -49,7 +44,7 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
     public SaveProfileAsytask(Activity ctx, String url, MultipartEntity entity2) {
         this.context = ctx;
         this.Url = url;
-        this.entity2 = entity2;
+//        this.entity = entity2;
         this.pref = new SettingPreference(ctx);
     }
 
@@ -88,29 +83,9 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
 //                    "application/json");
 //            httpost.setHeader("Authorization",
 //                    "bearer " + this.pref.getStringValue(Constant.jwttoken, ""));
-            MultipartEntity entity1 = new MultipartEntity(
-                    HttpMultipartMode.BROWSER_COMPATIBLE);
-
             if (this.entity != null) {
 //                httpost.setEntity(this.entity);
-                /*for (int index = 0; index < entity.size(); index++) {
-                    if (entity.get(index).getName()
-                            .equalsIgnoreCase("photo")) {
-                        // If the key equals to "image", we use FileBody to transfer
-                        // the data
-                        entity1.addPart(entity.get(index).getName(),
-                                new FileBody(new File(entity.get(index)
-                                        .getValue())));
-                    } else {
-                        // Normal string data
-                        entity1.addPart(
-                                entity.get(index).getName(),
-                                new StringBody(entity.get(index).getValue()));
-                    }
-                }
-*/
-//                httpost.setEntity(entity2);
-                httpost.setEntity(new UrlEncodedFormEntity(entity));
+                httpost.setEntity(new UrlEncodedFormEntity(this.entity));
             }
 //            String str2 = EntityUtils.toString(myClient.execute(httpost).getEntity(), HTTP.UTF_8);
 

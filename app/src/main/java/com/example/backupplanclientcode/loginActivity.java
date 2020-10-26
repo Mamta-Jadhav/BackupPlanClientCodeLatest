@@ -55,7 +55,6 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
         new Bugsense().startBugsense(getApplicationContext());
         this.connection = new ConnectionDetector(getApplicationContext());
         check_already_login();
-        Log.d("test", "Tokennnnn : "+this.pref.getStringValue(Constant.jwttoken,""));
         check_notificaion();
     }
 
@@ -214,6 +213,9 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
     private void saveUserInfo(JSONObject response) throws JSONException {
 
         this.pref.setStringValue(Constant.jwttoken, response.getString("jwttoken").trim());
+
+        Log.e("token..........",response.getString("jwttoken").trim());
+
         JSONObject login_detail = response.getJSONObject("login_detail");
         this.pref.setStringValue(Constant.user_name, login_detail.getString("username").trim());
         this.pref.setStringValue(Constant.user_email, login_detail.getString("email").trim());
@@ -228,7 +230,7 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
         this.pref.setStringValue(Constant.MortgageLoansFlag, login_detail.getString("loan_flag"));
         this.pref.setStringValue(Constant.medical_id, login_detail.getString("medical_id"));
         this.pref.setStringValue(Constant.internet_id, login_detail.getString("internet_id"));
-        this.pref.setStringValue(Constant.RetirementFlag, login_detail.getString("retirement_flag"));
+//        this.pref.setStringValue(Constant.RetirementFlag, login_detail.getString("retirement_flag"));
         this.pref.setStringValue(Constant.employer_id, login_detail.getString("employer_id"));
         this.pref.setStringValue(Constant.insurance_id, login_detail.getString("insurance_id"));
         this.pref.setStringValue(Constant.billToPay, login_detail.getString("bills_to_pay_flag"));

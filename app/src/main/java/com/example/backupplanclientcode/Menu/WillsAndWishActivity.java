@@ -2,15 +2,10 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,17 +26,15 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +49,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WillsAndWishActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class WillsAndWishActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     Button btn_back;
@@ -139,24 +135,24 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
 
     private void checkAlredySaveAccount() {
 //        if (this.pref.getStringValue(Constant.WillsAndWishesFalg, "").equalsIgnoreCase("1")) {
-//            this.btn_save.setText("Edit");
-//            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-//                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_will_wishes));
-//            }
-//            if (this.connection.isConnectingToInternet()) {
-//                try {
-//                    JSONObject nameValuePair = new JSONObject();
-//                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-//                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//                    new GeneralTask(this, ServiceUrl.get_wills_detail, nameValuePair, 2, "post").execute(new Void[0]);
-//                } catch (Exception e) {
-//                }
-//            } else {
-//                displayMessage(getResources().getString(R.string.connectionFailMessage));
-//            }
+            this.btn_save.setText("Edit");
+            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_will_wishes));
+            }
+            if (this.connection.isConnectingToInternet()) {
+                try {
+                    JSONObject nameValuePair = new JSONObject();
+                    nameValuePair.put("user_id", "11");//this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                    new GeneralTask(this, ServiceUrl.get_wills_detail, nameValuePair, 2, "post").execute(new Void[0]);
+                } catch (Exception e) {
+                }
+            } else {
+                displayMessage(getResources().getString(R.string.connectionFailMessage));
+            }
 //        } else {
-        this.actionBarTittle.setText(getResources().getString(R.string.menu_will_wishes));
-        addMoreImages();
+//            this.actionBarTittle.setText(getResources().getString(R.string.menu_will_wishes));
+//            addMoreImages();
 //        }
         if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             setEnableControl();
@@ -166,77 +162,26 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        if (resultCode == -1 && requestCode == 1) {
-//            Uri selectedImageUri = data.getData();
-//            String[] filePathColumn = {"_data"};
-//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
-//            cursor.moveToFirst();
-//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-//            cursor.close();
-//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-//            if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
-//                Log.e("equalsIgnoreCase(image)", "......if");
-//                if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
-//                    Log.e("!equalsIgnoreCase()", "......if");
-//                    this.currentImageVew.setContentDescription(picturePath.toString());
-//                    addMoreImages();
-//                    return;
-//                }
-//                this.currentImageVew.setContentDescription(picturePath.toString());
-//                Log.e("!equalsIgnoreCase()", "......else");
-//            }
-//        }
         if (resultCode == -1 && requestCode == 1) {
-            final Uri imageUri = data.getData();
-            InputStream imageStream = null;
-            try {
-                imageStream = getContentResolver().openInputStream(imageUri);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
-
-            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            Uri selectedImageUri = data.getData();
+            String[] filePathColumn = {"_data"};
+            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
             cursor.moveToFirst();
-            Log.d("test", cursor.getString(nameIndex));
-
-            this.currentImageVew.setImageBitmap(selectedImage);
-            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
-            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
-            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
-
-            // CALL THIS METHOD TO GET THE ACTUAL PATH
-            File finalFile = new File(getRealPathFromURI(tempUri));
-
-            System.out.println(finalFile.getAbsoluteFile());
-            System.out.println(finalFile.getName());
-            try {
-                System.out.println(finalFile.getCanonicalPath());
-            } catch (IOException e) {
-                e.printStackTrace();
+            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+            cursor.close();
+            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+            if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
+                Log.e("equalsIgnoreCase(image)", "......if");
+                if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
+                    Log.e("!equalsIgnoreCase()", "......if");
+                    this.currentImageVew.setContentDescription(picturePath.toString());
+                    addMoreImages();
+                    return;
+                }
+                this.currentImageVew.setContentDescription(picturePath.toString());
+                Log.e("!equalsIgnoreCase()", "......else");
             }
-            this.currentImageVew.setContentDescription(finalFile.getName());
-
-            Log.d("test", "selectedImage " + selectedImage);
-            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
-
         }
-    }
-
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
-    }
-
-    public String getRealPathFromURI(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        cursor.moveToFirst();
-        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-        return cursor.getString(idx);
     }
 
     @SuppressLint({"InflateParams"})
@@ -304,7 +249,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
     private void prePareWillsJson() {
         try {
             JSONObject willsJson = new JSONObject();
-            willsJson.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+            willsJson.put("user_id", "11");//this.pref.getStringValue(Constant.user_id, ""));
             willsJson.put("wills_id", this.edit_wills_id.getText().toString().trim());
             willsJson.put("wishes_id", this.edit_wishes_id.getText().toString().trim());
             if (this.yesNoHaveWill.isChecked()) {
@@ -351,7 +296,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
                     this.list_images.add(item_map);
                     Log.i("images :", this.list_images.toString());
                     if (this.collectImages.equalsIgnoreCase("")) {
-                        this.collectImages = this.collectImages.concat(iv.getContentDescription().toString());
+                        this.collectImages = this.collectImages.concat("image" + i);
                     } else {
                         this.collectImages = this.collectImages.concat(",image" + i);
                     }
@@ -367,14 +312,12 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             willsJson.put("wishes_images", this.collectImages);
             willsJson.put("w_location", this.editLocation.getText().toString().trim());
             willsJson.put("delete_images", this.delete_images);
-            MultipartEntity entity = new MultipartEntity();
+            MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             JSONObject sendJson = new JSONObject();
             sendJson.put("wills_data", willsJson);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
             for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-//                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
-                entity.addPart("wishes_images[]", new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
-                Log.e("send image path :", (String) ((HashMap) this.list_images.get(i2)).get("image_path"));
+                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
             }
             Log.e("send wills json :", sendJson.toString());
             Log.i("images :", this.list_images.toString());
@@ -388,7 +331,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
                 new SaveProfileAsytask(this, ServiceUrl.edit_wills, nameValuePairs).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_wills, entity).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_wills, nameValuePairs).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -505,5 +448,72 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
 
     private void displayMessage(String string) {
         Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 }

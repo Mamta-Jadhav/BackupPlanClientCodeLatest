@@ -3,6 +3,7 @@ package com.example.backupplanclientcode;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -11,10 +12,14 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import com.example.backupplanclientcode.Bugsense.Bugsense;
+import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import java.util.ArrayList;
 
-public class CustomeFiledActivity extends Activity implements OnClickListener, OnCheckedChangeListener {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class CustomeFiledActivity extends Activity implements OnClickListener, OnCheckedChangeListener, LogOutTimerUtil.LogOutListener {
     LinearLayout Siblings_layout;
     Button btn_add;
     Button btn_cancel;
@@ -38,20 +43,20 @@ public class CustomeFiledActivity extends Activity implements OnClickListener, O
     private void findViewId() {
         this.customFieldList = new ArrayList<>();
         this.customFieldList.clear();
-        this.Siblings_layout = (LinearLayout) findViewById(R.id.Siblings_layout);
-        this.childredn_layout = (LinearLayout) findViewById(R.id.childredn_layout);
+        this.Siblings_layout = findViewById(R.id.Siblings_layout);
+        this.childredn_layout = findViewById(R.id.childredn_layout);
         if (getIntent().getStringExtra("visible_part").equalsIgnoreCase("siblings")) {
             this.Siblings_layout.setVisibility(View.VISIBLE);
         } else if (getIntent().getStringExtra("visible_part").equalsIgnoreCase("children")) {
             this.childredn_layout.setVisibility(View.VISIBLE);
         }
-        this.btn_add = (Button) findViewById(R.id.btn_add);
-        this.btn_cancel = (Button) findViewById(R.id.btn_cancel);
+        this.btn_add = findViewById(R.id.btn_add);
+        this.btn_cancel = findViewById(R.id.btn_cancel);
         this.btn_cancel.setOnClickListener(this);
         this.btn_add.setOnClickListener(this);
-        this.edit_brother_siblings = (CheckBox) findViewById(R.id.edit_brother_siblings);
-        this.edit_sister_siblings = (CheckBox) findViewById(R.id.edit_sister_siblings);
-        this.edit_Children = (CheckBox) findViewById(R.id.edit_Children);
+        this.edit_brother_siblings = findViewById(R.id.edit_brother_siblings);
+        this.edit_sister_siblings = findViewById(R.id.edit_sister_siblings);
+        this.edit_Children = findViewById(R.id.edit_Children);
         this.edit_sister_siblings.setOnCheckedChangeListener(this);
         this.edit_brother_siblings.setOnCheckedChangeListener(this);
         this.edit_Children.setOnCheckedChangeListener(this);
@@ -114,6 +119,73 @@ public class CustomeFiledActivity extends Activity implements OnClickListener, O
                 return;
             default:
                 return;
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

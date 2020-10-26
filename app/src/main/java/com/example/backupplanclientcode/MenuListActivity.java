@@ -41,7 +41,10 @@ import org.json.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MenuListActivity extends Activity implements OnClickListener, GeneralTask.ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MenuListActivity extends Activity implements OnClickListener, GeneralTask.ResponseListener_General, LogOutTimerUtil.LogOutListener {
     LinearLayout account_menu;
     Button btn_setting;
     DBHelper dbHelper;
@@ -88,8 +91,8 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
             dialog.setCancelable(false);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
             dialog.getWindow().setWindowAnimations(R.style.dialog_animation_fade);
-            ((TextView) dialog.findViewById(R.id.tv_message)).setText(getIntent().getStringExtra("message").toString().trim());
-            ((Button) dialog.findViewById(R.id.btn_ok)).setOnClickListener(new OnClickListener() {
+            ((TextView) dialog.findViewById(R.id.tv_message)).setText(getIntent().getStringExtra("message").trim());
+            dialog.findViewById(R.id.btn_ok).setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     dialog.dismiss();
                 }
@@ -99,23 +102,23 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
     }
 
     private void findViewId() {
-        this.menu_profile = (LinearLayout) findViewById(R.id.menu_profile);
-        this.account_menu = (LinearLayout) findViewById(R.id.account_menu);
-        this.menu_documents = (LinearLayout) findViewById(R.id.menu_documents);
-        this.menu_Asset = (LinearLayout) findViewById(R.id.menu_Asset);
-        this.menu_Planning = (LinearLayout) findViewById(R.id.menu_Planning);
-        this.medical_menu = (LinearLayout) findViewById(R.id.medical_menu);
-        this.menu_internet = (LinearLayout) findViewById(R.id.menu_internet);
-        this.menu_employer = (LinearLayout) findViewById(R.id.menu_employer);
-        this.menu_insurance = (LinearLayout) findViewById(R.id.menu_insurance);
-        this.menu_emergency = (LinearLayout) findViewById(R.id.menu_emergency);
-        this.menu_resource = (LinearLayout) findViewById(R.id.menu_resource);
-        this.menu_notificaion = (LinearLayout) findViewById(R.id.menu_notificaion);
-        this.menu_add_coupon = (LinearLayout) findViewById(R.id.menu_add_coupon);
-        this.menu_upgrade = (LinearLayout) findViewById(R.id.menu_upgrade);
-        this.menu_guest_user = (LinearLayout) findViewById(R.id.menu_guest_user);
-        this.menu_password = (LinearLayout) findViewById(R.id.menu_password);
-        this.btn_setting = (Button) findViewById(R.id.btn_setting);
+        this.menu_profile = findViewById(R.id.menu_profile);
+        this.account_menu = findViewById(R.id.account_menu);
+        this.menu_documents = findViewById(R.id.menu_documents);
+        this.menu_Asset = findViewById(R.id.menu_Asset);
+        this.menu_Planning = findViewById(R.id.menu_Planning);
+        this.medical_menu = findViewById(R.id.medical_menu);
+        this.menu_internet = findViewById(R.id.menu_internet);
+        this.menu_employer = findViewById(R.id.menu_employer);
+        this.menu_insurance = findViewById(R.id.menu_insurance);
+        this.menu_emergency = findViewById(R.id.menu_emergency);
+        this.menu_resource = findViewById(R.id.menu_resource);
+        this.menu_notificaion = findViewById(R.id.menu_notificaion);
+        this.menu_add_coupon = findViewById(R.id.menu_add_coupon);
+        this.menu_upgrade = findViewById(R.id.menu_upgrade);
+        this.menu_guest_user = findViewById(R.id.menu_guest_user);
+        this.menu_password = findViewById(R.id.menu_password);
+        this.btn_setting = findViewById(R.id.btn_setting);
         this.menu_profile.setOnClickListener(this);
         this.account_menu.setOnClickListener(this);
         this.menu_documents.setOnClickListener(this);
@@ -132,7 +135,7 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         this.menu_notificaion.setOnClickListener(this);
         this.menu_add_coupon.setOnClickListener(this);
         this.menu_upgrade.setOnClickListener(this);
-        this.tv_guest_user_entres = (TextView) findViewById(R.id.tv_guest_user_entres);
+        this.tv_guest_user_entres = findViewById(R.id.tv_guest_user_entres);
         this.btn_setting.setOnClickListener(this);
         if (this.pref.getBooleanValue(Constant.showAlertFirstTime, false)) {
             show_user_message_dialog();
@@ -141,7 +144,7 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
     }
 
     private void check_notification_status() {
-        this.tv_notificaion_status = (TextView) findViewById(R.id.tv_notificaion_status);
+        this.tv_notificaion_status = findViewById(R.id.tv_notificaion_status);
         if (this.pref.getBooleanValue(Constant.isNotification, false)) {
             this.tv_notificaion_status.setText("ON");
         } else {
@@ -159,11 +162,11 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 
     private void setEnableMenu() {
         if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-            this.tv_guest_user = (TextView) findViewById(R.id.tv_guest_user);
+            this.tv_guest_user = findViewById(R.id.tv_guest_user);
             this.tv_guest_user.setTextColor(-7829368);
             this.tv_guest_user_entres.setTextColor(-7829368);
-            this.tv_password_menu = (TextView) findViewById(R.id.tv_password_menu);
-            this.tv_password_entries = (TextView) findViewById(R.id.tv_password_entries);
+            this.tv_password_menu = findViewById(R.id.tv_password_menu);
+            this.tv_password_entries = findViewById(R.id.tv_password_entries);
             this.tv_password_menu.setTextColor(-7829368);
             this.tv_password_entries.setTextColor(-7829368);
         }
@@ -176,7 +179,7 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         dialog.setCancelable(false);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
         dialog.getWindow().setWindowAnimations(R.style.dialog_animation_fade);
-        ((Button) dialog.findViewById(R.id.btn_ok)).setOnClickListener(new OnClickListener() {
+        dialog.findViewById(R.id.btn_ok).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 MenuListActivity.this.pref.setBooleanValue(Constant.showAlertFirstTime, false);
                 dialog.dismiss();
@@ -199,7 +202,7 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
             }
         } catch (Exception e) {
             e.printStackTrace();
-            displayToast("" + e.getLocalizedMessage().toString());
+            displayToast("" + e.getLocalizedMessage());
         }
     }
 
@@ -214,7 +217,7 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
                     JSONObject nameValuePairs = new JSONObject();
                     nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
 
-                    new GeneralTask(this, ServiceUrl.logout, nameValuePairs, 1, "get").execute(new Void[0]);
+                    new GeneralTask(this, ServiceUrl.logout, nameValuePairs, 1, "get").execute();
 
                 } catch (Exception e) {
                     Log.d("test", "Error in login JsonObject");
@@ -326,18 +329,18 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
     }
 
     private void showInvalidSubscriptionAlert() {
-        new AlertDialog.Builder(this).setTitle((CharSequence) "Alert").setMessage((CharSequence) "Please purchase our paid version in order to access paid features.\nCost $4.99 \nDo you want to buy?").setPositiveButton("17039379", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(this).setTitle("Alert").setMessage("Please purchase our paid version in order to access paid features.\nCost $4.99 \nDo you want to buy?").setPositiveButton("17039379", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
-        }).setNegativeButton("17039369", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
+        }).setNegativeButton("17039369", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         }).show();
     }
 
-    @Override
+  /*  @Override
     protected void onPause() {
         super.onPause();
 
@@ -356,6 +359,73 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 //            timer = null;
 //        }
         check_notification_status();
+    }*/
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 
     private class LogOutTimerTask extends TimerTask {

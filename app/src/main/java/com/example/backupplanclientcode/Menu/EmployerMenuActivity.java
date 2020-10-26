@@ -21,10 +21,12 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.File;
@@ -40,7 +42,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class EmployerMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class EmployerMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     Button btn_back;
@@ -74,7 +79,7 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
     }
 
     private void checkAlredySaveAccount() {
-        if (this.pref.getStringValue(Constant.employer_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.employer_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        if (this.pref.getStringValue(Constant.employer_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.actionBarTittle.setText(getResources().getString(R.string.menu_employer));
             return;
         }
@@ -85,7 +90,7 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
 //                nameValuePair.put("employer_id", "2");//this.pref.getStringValue(Constant.employer_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_employer_detail, nameValuePair, 2, "post").execute(new Void[0]);
@@ -222,14 +227,12 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
             sendJson.put("employer_data", json);
             Log.e("send json", sendJson.toString());
             entity.addPart("json_data", new StringBody(sendJson.toString()));
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_employer, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_employer, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_employer, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_employer, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -287,6 +290,73 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
             cursor.close();
             this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
             this.currentImageVew.setContentDescription(picturePath.toString());
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }
