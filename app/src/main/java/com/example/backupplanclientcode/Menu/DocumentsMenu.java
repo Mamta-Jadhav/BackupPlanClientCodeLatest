@@ -1,10 +1,15 @@
 package com.example.backupplanclientcode.Menu;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,7 +35,11 @@ import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -584,16 +593,67 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode == -1 && requestCode == 1) {
+//            Uri selectedImageUri = data.getData();
+//            String[] filePathColumn = {"_data"};
+//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+//            cursor.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+//            this.currentImageVew.setContentDescription(picturePath.toString());
+//        }
         if (resultCode == -1 && requestCode == 1) {
-            Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"_data"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());
+            Log.d("test", cursor.getString(nameIndex));
+
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     public void onClick(View v) {
@@ -617,7 +677,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_birth_certi", "1");
                 this.document_data.put("birth_certi", "birth_certi");
                 if (!this.img_brith_certificate.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("birth_certi", new FileBody(new File(this.img_brith_certificate.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("birth_certi", new FileBody(new File(this.img_brith_certificate.getContentDescription().toString())));
                     Log.i("img_brith_certificate", this.img_brith_certificate.getContentDescription().toString());
                 }
             } else {
@@ -628,7 +688,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_sin", "1");
                 this.document_data.put("sin", "sin");
                 if (!this.img_SOCIAL_SECURITY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("sin", new FileBody(new File(this.img_SOCIAL_SECURITY.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("sin", new FileBody(new File(this.img_SOCIAL_SECURITY.getContentDescription().toString())));
                     Log.i("img_SOCIAL_SECURITY", this.img_SOCIAL_SECURITY.getContentDescription().toString());
                 }
             } else {
@@ -639,7 +699,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_merr_certi", "1");
                 this.document_data.put("merr_certi", "merr_certi");
                 if (!this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("merr_certi", new FileBody(new File(this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("merr_certi", new FileBody(new File(this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString())));
                     Log.i("MARRIAGE_CRTFCATE", this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString());
                 }
             } else {
@@ -650,7 +710,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_passport", "1");
                 this.document_data.put("passport", "passport");
                 if (!this.img_PASSPORTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("passport", new FileBody(new File(this.img_PASSPORTS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("passport", new FileBody(new File(this.img_PASSPORTS.getContentDescription().toString())));
                     Log.i("img_PASSPORTS", this.img_PASSPORTS.getContentDescription().toString());
                 }
             } else {
@@ -661,7 +721,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_pre_merr_agree", "1");
                 this.document_data.put("pre_merr_agree", "pre_merr_agree");
                 if (!this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("pre_merr_agree", new FileBody(new File(this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("pre_merr_agree", new FileBody(new File(this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString())));
                     Log.i("PRE_AGREEMENTS", this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString());
                 }
             } else {
@@ -672,7 +732,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_nexus", "1");
                 this.document_data.put("nexus", "nexus");
                 if (!this.img_NEXUS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("nexus", new FileBody(new File(this.img_NEXUS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("nexus", new FileBody(new File(this.img_NEXUS.getContentDescription().toString())));
                     Log.i("img_NEXUS", this.img_NEXUS.getContentDescription().toString());
                 }
             } else {
@@ -683,7 +743,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_citizen_paper", "1");
                 this.document_data.put("citizen_paper", "citizen_paper");
                 if (!this.img_CITIZENSHIP_PAPERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("citizen_paper", new FileBody(new File(this.img_CITIZENSHIP_PAPERS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("citizen_paper", new FileBody(new File(this.img_CITIZENSHIP_PAPERS.getContentDescription().toString())));
                     Log.i("img_CITIZENSHIP_PAPERS", this.img_CITIZENSHIP_PAPERS.getContentDescription().toString());
                 }
             } else {
@@ -694,7 +754,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_alimony", "1");
                 this.document_data.put("alimony", "alimony");
                 if (!this.img_ALIMONY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("alimony", new FileBody(new File(this.img_ALIMONY.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("alimony", new FileBody(new File(this.img_ALIMONY.getContentDescription().toString())));
                     Log.i("img_ALIMONY", this.img_ALIMONY.getContentDescription().toString());
                 }
             } else {
@@ -705,7 +765,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_maintance", "1");
                 this.document_data.put("maintance", "maintance");
                 if (!this.img_MAINTENANCE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("maintance", new FileBody(new File(this.img_MAINTENANCE.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("maintance", new FileBody(new File(this.img_MAINTENANCE.getContentDescription().toString())));
                     Log.i("img_MAINTENANCE", this.img_MAINTENANCE.getContentDescription().toString());
                 }
             } else {
@@ -716,7 +776,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_custody_order", "1");
                 this.document_data.put("custody_order", "custody_order");
                 if (!this.img_CUSTODY_ORDERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("custody_order", new FileBody(new File(this.img_CUSTODY_ORDERS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("custody_order", new FileBody(new File(this.img_CUSTODY_ORDERS.getContentDescription().toString())));
                     Log.i("img_CUSTODY_ORDERS", this.img_CUSTODY_ORDERS.getContentDescription().toString());
                 }
             } else {
@@ -727,7 +787,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_immig_paper", "1");
                 this.document_data.put("immig_paper", "immig_paper");
                 if (!this.img_IMMIGRATION_PAPERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("immig_paper", new FileBody(new File(this.img_IMMIGRATION_PAPERS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("immig_paper", new FileBody(new File(this.img_IMMIGRATION_PAPERS.getContentDescription().toString())));
                     Log.i("img_IMMIGRATION_PAPERS", this.img_IMMIGRATION_PAPERS.getContentDescription().toString());
                 }
             } else {
@@ -738,7 +798,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_divorce_agree", "1");
                 this.document_data.put("divorce_agree", "divorce_agree");
                 if (!this.img_DIVORCE_DECREE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("divorce_agree", new FileBody(new File(this.img_DIVORCE_DECREE.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("divorce_agree", new FileBody(new File(this.img_DIVORCE_DECREE.getContentDescription().toString())));
                     Log.i("img_DIVORCE_DECREE", this.img_DIVORCE_DECREE.getContentDescription().toString());
                 }
             } else {
@@ -749,7 +809,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_sepration_agree", "1");
                 this.document_data.put("sepration_agree", "sepration_agree");
                 if (!this.img_SEPARATION_AGREEMENT.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("sepration_agree", new FileBody(new File(this.img_SEPARATION_AGREEMENT.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("sepration_agree", new FileBody(new File(this.img_SEPARATION_AGREEMENT.getContentDescription().toString())));
                     Log.i("SPRTION_AGREMENT", this.img_SEPARATION_AGREEMENT.getContentDescription().toString());
                 }
             } else {
@@ -760,7 +820,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_cemetery", "1");
                 this.document_data.put("cemetery", "cemetery");
                 if (!this.img_CEMETERY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("cemetery", new FileBody(new File(this.img_CEMETERY.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("cemetery", new FileBody(new File(this.img_CEMETERY.getContentDescription().toString())));
                     Log.i("img_CEMETERY", this.img_CEMETERY.getContentDescription().toString());
                 }
             } else {
@@ -771,7 +831,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_pre_paid_fun_arra", "1");
                 this.document_data.put("pre_paid_fun_arra", "pre_paid_fun_arra");
                 if (!this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("pre_paid_fun_arra", new FileBody(new File(this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("pre_paid_fun_arra", new FileBody(new File(this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString())));
                     Log.i("FUNERAL_ARNGS", this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString());
                 }
             } else {
@@ -782,7 +842,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_war_vet_rec", "1");
                 this.document_data.put("war_vet_rec", "war_vet_rec");
                 if (!this.img_WAR_VETERAN_RECORDS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("war_vet_rec", new FileBody(new File(this.img_WAR_VETERAN_RECORDS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("war_vet_rec", new FileBody(new File(this.img_WAR_VETERAN_RECORDS.getContentDescription().toString())));
                     Log.i("img_WAR_VETERAN_RECORDS", this.img_WAR_VETERAN_RECORDS.getContentDescription().toString());
                 }
             } else {
@@ -793,7 +853,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_wollet_card", "1");
                 this.document_data.put("wollet_card", "wollet_card");
                 if (!this.img_YOUR_WALLTE_COPY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("wollet_card", new FileBody(new File(this.img_YOUR_WALLTE_COPY.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("wollet_card", new FileBody(new File(this.img_YOUR_WALLTE_COPY.getContentDescription().toString())));
                     Log.i("img_YOUR_WALLTE_COPY", this.img_YOUR_WALLTE_COPY.getContentDescription().toString());
                 }
             } else {
@@ -804,7 +864,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 this.document_data.put("is_take_pic", "1");
                 this.document_data.put("take_pic", "take_pic");
                 if (!this.img_YOUR_KEYS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("take_pic", new FileBody(new File(this.img_YOUR_KEYS.getContentDescription().toString()), "image/jpeg"));
+                    entity.addPart("take_pic", new FileBody(new File(this.img_YOUR_KEYS.getContentDescription().toString())));
                     Log.i("img_YOUR_KEYS", this.img_YOUR_KEYS.getContentDescription().toString());
                 }
             } else {
@@ -815,7 +875,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             this.document_data.put("r_location", this.edit_registrationRecord.getText().toString().trim());
             this.document_data.put("r_party_access", this.edit_3rdparty.getText().toString().trim());
             if (!this.img_RegistrationRecord.getContentDescription().toString().equalsIgnoreCase("")) {
-                entity.addPart("r_photo", new FileBody(new File(this.img_RegistrationRecord.getContentDescription().toString()), "image/jpeg"));
+                entity.addPart("r_photo", new FileBody(new File(this.img_RegistrationRecord.getContentDescription().toString())));
                 Log.i("img_RegistrationRecord", this.img_RegistrationRecord.getContentDescription().toString());
                 this.document_data.put("r_photo", "r_photo");
             } else {
@@ -824,7 +884,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             this.document_data.put("fp_location", this.edit_PROF_SAFE.getText().toString().trim());
             if (!this.img_PROOF_SAFE.getContentDescription().toString().equalsIgnoreCase("")) {
                 this.document_data.put("fp_photo", "fp_photo");
-                entity.addPart("fp_photo", new FileBody(new File(this.img_PROOF_SAFE.getContentDescription().toString()), "image/jpeg"));
+                entity.addPart("fp_photo", new FileBody(new File(this.img_PROOF_SAFE.getContentDescription().toString())));
                 Log.i("img_PROOF_SAFE", this.img_PROOF_SAFE.getContentDescription().toString());
             } else {
                 this.document_data.put("fp_photo", "");
@@ -838,13 +898,13 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 entity.addPart("json_data", new StringBody(sendJsonOBj.toString()));
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
                 nameValuePairs.add(new BasicNameValuePair("json_data", sendJsonOBj.toString()));
-                new SaveProfileAsytask(this, ServiceUrl.edit_document, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_document, entity).execute(new Void[0]);
             } else {
                 sendJsonOBj.put("document_data", this.document_data);
                 entity.addPart("json_data", new StringBody(sendJsonOBj.toString()));
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
                 nameValuePairs.add(new BasicNameValuePair("json_data", sendJsonOBj.toString()));
-                new SaveProfileAsytask(this, ServiceUrl.save_document, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_document, entity).execute(new Void[0]);
             }
             Log.e("SEND OBJ", sendJsonOBj.toString());
         } catch (Exception e) {

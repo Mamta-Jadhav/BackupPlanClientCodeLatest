@@ -70,8 +70,8 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
 //                    "<calculated when request is sent>");
 //            httpost.setHeader("Content-Type",
 //                    "multipart/form-data; boundary=<calculated when request is sent>");
-////            httpost.setHeader("Content-Length",
-////                    "<calculated when request is sent>");
+//            httpost.setHeader("Content-Length",
+//                    "<calculated when request is sent>");
 //            httpost.setHeader("Host",
 //                    "<calculated when request is sent>");
 //            httpost.setHeader(HTTP.USER_AGENT,
@@ -88,10 +88,8 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
 //                    "application/json");
 //            httpost.setHeader("Authorization",
 //                    "bearer " + this.pref.getStringValue(Constant.jwttoken, ""));
-            MultipartEntity entity1 = new MultipartEntity(
-                    HttpMultipartMode.BROWSER_COMPATIBLE);
 
-            if (this.entity != null) {
+            if (this.entity2 != null) {
 //                httpost.setEntity(this.entity);
                 /*for (int index = 0; index < entity.size(); index++) {
                     if (entity.get(index).getName()
@@ -107,9 +105,11 @@ public class SaveProfileAsytask extends AsyncTask<Void, Void, JSONObject> {
                                 entity.get(index).getName(),
                                 new StringBody(entity.get(index).getValue()));
                     }
-                }
-*/
-//                httpost.setEntity(entity2);
+                }*/
+
+                httpost.setEntity(entity2);
+//                httpost.setEntity(new UrlEncodedFormEntity(entity));
+            }else {
                 httpost.setEntity(new UrlEncodedFormEntity(entity));
             }
 //            String str2 = EntityUtils.toString(myClient.execute(httpost).getEntity(), HTTP.UTF_8);

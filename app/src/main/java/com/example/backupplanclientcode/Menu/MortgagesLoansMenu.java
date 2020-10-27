@@ -2,10 +2,15 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +36,11 @@ import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,24 +88,24 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
     }
 
     private void check_Save_Edit() {
-        if (this.pref.getStringValue(Constant.MortgageLoansFlag, "").equalsIgnoreCase("1")) {
-            this.btn_save.setText("Edit");
-            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_Mortgage_loan));
-            }
-            if (this.connection.isConnectingToInternet()) {
-                try {
-                    JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-                    new GeneralTask(this, ServiceUrl.get_loan_mortgage_detail, nameValuePair, 2, "post").execute(new Void[0]);
-                } catch (Exception e) {
-                }
-                return;
-            }
-            displayMessage(getResources().getString(R.string.connectionFailMessage));
-            return;
-        }
+//        if (this.pref.getStringValue(Constant.MortgageLoansFlag, "").equalsIgnoreCase("1")) {
+//            this.btn_save.setText("Edit");
+//            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+//                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_Mortgage_loan));
+//            }
+//            if (this.connection.isConnectingToInternet()) {
+//                try {
+//                    JSONObject nameValuePair = new JSONObject();
+//                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+//                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+//                    new GeneralTask(this, ServiceUrl.get_loan_mortgage_detail, nameValuePair, 2, "post").execute(new Void[0]);
+//                } catch (Exception e) {
+//                }
+//                return;
+//            }
+//            displayMessage(getResources().getString(R.string.connectionFailMessage));
+//            return;
+//        }
         this.actionBarTittle.setText(getResources().getString(R.string.menu_Mortgage_loan));
         addLoanLayout();
         addMortgageLayout();
@@ -140,24 +149,27 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
             sendJson.put("loan_mortgage_data", this.loan_mortgage_data);
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
-           List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
-
+            JSONArray array = new JSONArray();
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg"));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg").getFilename()));
+                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+//                array.put(new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
                 Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
                 Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
             }
 
+//            entity.addPart("photo", new StringBody(array.toString()));
+            Log.e("Sending json array", array.toString());
             Log.e("Sending json object", sendJson.toString());
             Log.i("list of images", this.list_images.toString());
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_loan_mortgage, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_loan_mortgage, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_loan_mortgage, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_loan_mortgage, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -189,10 +201,12 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 if (img_mortgages.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("m_photo", "");
                 } else {
-                    jsonbj.put("m_photo", "m_photo" + i);
+                    String[] arr = img_mortgages.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("m_photo", new File(atr));
                     HashMap<String, String> item_map = new HashMap<>();
-                    item_map.put("image_path", img_mortgages.getContentDescription().toString());
-                    item_map.put("image_name", "m_photo" + i);
+                    item_map.put("image_path", atr);
+                    item_map.put("image_name", atr);
                     this.list_images.add(item_map);
                 }
                 this.MortgageJsonArray.put(jsonbj);
@@ -225,10 +239,12 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 if (img_loan.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("l_photo", "");
                 } else {
-                    jsonbj.put("l_photo", "l_photo" + i);
+                    String[] arr = img_loan.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("l_photo", new File(atr));
                     HashMap<String, String> item_map = new HashMap<>();
-                    item_map.put("image_path", img_loan.getContentDescription().toString());
-                    item_map.put("image_name", "l_photo" + i);
+                    item_map.put("image_path", atr);
+                    item_map.put("image_name", atr);
                     this.list_images.add(item_map);
                 }
                 this.LoanJsonArray.put(jsonbj);
@@ -344,7 +360,7 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == -1 && requestCode == 1) {
+        /*if (resultCode == -1 && requestCode == 1) {
             Uri selectedImageUri = data.getData();
             String[] filePathColumn = {"_data"};
             Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
@@ -353,7 +369,59 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
             cursor.close();
             this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
             this.currentImageVew.setContentDescription(picturePath.toString());
+        }*/
+
+        if (resultCode == -1 && requestCode == 1) {
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     public void on_GeneralSuccess(JSONObject response, int responseCode) {

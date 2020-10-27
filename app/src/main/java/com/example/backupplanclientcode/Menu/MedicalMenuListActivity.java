@@ -113,28 +113,28 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
     }
 
     private void checkAlreadySaveinvestment() {
-        if (this.pref.getStringValue(Constant.medical_id, "").equalsIgnoreCase("0") ||this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+//        if (this.pref.getStringValue(Constant.medical_id, "").equalsIgnoreCase("0") ||this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
         this.actionBarTittle.setText(getResources().getString(R.string.menu_medical));
         addAppointmentlayout();
         return;
-        }
-        this.btn_save.setText("Edit");
-        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
-        }
-        if (this.connection.isConnectingToInternet()) {
-           try {
-               JSONObject nameValuePair = new JSONObject();
-               nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-               nameValuePair.put("medical_id",this.pref.getStringValue(Constant.medical_id, "1"));
-               nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-               new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
-           }catch(Exception e){
-
-           }
-            return;
-        }
-        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
+//        }
+//        this.btn_save.setText("Edit");
+//        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+//            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
+//        }
+//        if (this.connection.isConnectingToInternet()) {
+//           try {
+//               JSONObject nameValuePair = new JSONObject();
+//               nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+//               nameValuePair.put("medical_id",this.pref.getStringValue(Constant.medical_id, "1"));
+//               nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+//               new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
+//           }catch(Exception e){
+//
+//           }
+//            return;
+//        }
+//        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
     }
 
     public void onClick(View v) {
@@ -188,7 +188,7 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
                 if (!img_Appointment.getContentDescription().toString().trim().isEmpty()) {
                     json.put("a_photo", selectedImage);
 //                    File file = new File(img_Appointment.getContentDescription().toString());
-//                    multipartEntity.addPart("a_photo" + i, new FileBody(file, "image/jpeg"));
+//                    multipartEntity.addPart("a_photo" + i, new FileBody(file));
 
 //                    Bitmap immagex=selectedImage;
 //                    ByteArrayOutputStream baos = new ByteArrayOutputStream();

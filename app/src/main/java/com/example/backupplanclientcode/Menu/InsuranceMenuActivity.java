@@ -430,8 +430,8 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg"));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg").getFilename()));
+                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
                 Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
                 Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
             }
@@ -439,9 +439,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_insurance, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_insurance, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_insurance, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_insurance, entity).execute(new Void[0]);
             }
             Log.e("Insurance json :", sendJson.toString());
         } catch (Exception e) {

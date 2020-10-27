@@ -760,9 +760,9 @@ public class BillsToPayMenuActivity extends Activity implements OnClickListener,
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_bill_to_pay, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_bill_to_pay, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_bill_to_pay, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_bill_to_pay, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();

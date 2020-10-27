@@ -217,7 +217,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            this.currentImageVew.setContentDescription(finalFile.getName());
+            this.currentImageVew.setContentDescription(finalFile.getPath());
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
@@ -364,7 +364,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
                     }
                 }
             }
-            willsJson.put("wishes_images", this.collectImages);
+            willsJson.put("wishes_images", "a.jpg");//this.collectImages);
             willsJson.put("w_location", this.editLocation.getText().toString().trim());
             willsJson.put("delete_images", this.delete_images);
             MultipartEntity entity = new MultipartEntity();
@@ -372,8 +372,8 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             sendJson.put("wills_data", willsJson);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
             for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-//                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
-                entity.addPart("wishes_images[]", new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
+//                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))));
+                entity.addPart("wishes_images[]", new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))));
                 Log.e("send image path :", (String) ((HashMap) this.list_images.get(i2)).get("image_path"));
             }
             Log.e("send wills json :", sendJson.toString());
@@ -381,12 +381,12 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-                nameValuePairs.add((new BasicNameValuePair((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg").getFilename())));
+                nameValuePairs.add((new BasicNameValuePair((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))).getFilename())));
             }
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_wills, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_wills, entity).execute(new Void[0]);
             } else {
                 new SaveProfileAsytask(this, ServiceUrl.save_wills, entity).execute(new Void[0]);
             }

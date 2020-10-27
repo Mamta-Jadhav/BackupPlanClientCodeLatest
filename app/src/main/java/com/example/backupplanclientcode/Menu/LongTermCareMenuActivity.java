@@ -75,7 +75,7 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         this.connection = new ConnectionDetector(getApplicationContext());
         new Bugsense().startBugsense(getApplicationContext());
         findViewId();
-        checkAlredySaveAccount();
+//        checkAlredySaveAccount();
     }
 
     private void checkAlredySaveAccount() {
@@ -266,7 +266,7 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
             sendJson.put("long_care_data", json);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
             for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path")), "image/jpeg"));
+                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))));
             }
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
@@ -275,9 +275,9 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_long_term_care, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_long_term_care, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_long_term_care, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_long_term_care, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();

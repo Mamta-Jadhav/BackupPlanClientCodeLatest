@@ -1,10 +1,15 @@
 package com.example.backupplanclientcode.Menu;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -27,7 +32,11 @@ import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -196,25 +205,25 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
             json.put("dis_company", this.editCmpIns.getText().toString().trim());
             if (!this.imgMedical.getContentDescription().toString().isEmpty()) {
                 json.put("medical_photo", "medical_photo");
-                entity.addPart("medical_photo", new FileBody(new File(this.imgMedical.getContentDescription().toString().trim()), "image/jpeg"));
+                entity.addPart("medical_photo", new FileBody(new File(this.imgMedical.getContentDescription().toString().trim())));
             } else {
                 json.put("medical_photo", "");
             }
             if (!this.imgTravel.getContentDescription().toString().isEmpty()) {
                 json.put("travel_photo", "travel_photo");
-                entity.addPart("travel_photo", new FileBody(new File(this.imgTravel.getContentDescription().toString().trim()), "image/jpeg"));
+                entity.addPart("travel_photo", new FileBody(new File(this.imgTravel.getContentDescription().toString().trim())));
             } else {
                 json.put("travel_photo", "");
             }
             if (!this.imgDental.getContentDescription().toString().isEmpty()) {
                 json.put("dental_photo", "dental_photo");
-                entity.addPart("dental_photo", new FileBody(new File(this.imgDental.getContentDescription().toString().trim()), "image/jpeg"));
+                entity.addPart("dental_photo", new FileBody(new File(this.imgDental.getContentDescription().toString().trim())));
             } else {
                 json.put("dental_photo", "");
             }
             if (!this.imgPension.getContentDescription().toString().isEmpty()) {
                 json.put("pension_photo", "pension_photo");
-                entity.addPart("pension_photo", new FileBody(new File(this.imgPension.getContentDescription().toString().trim()), "image/jpeg"));
+                entity.addPart("pension_photo", new FileBody(new File(this.imgPension.getContentDescription().toString().trim())));
             } else {
                 json.put("pension_photo", "");
             }
@@ -227,9 +236,9 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_employer, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_employer, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_employer, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_employer, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -278,15 +287,66 @@ public class EmployerMenuActivity extends Activity implements OnClickListener, R
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode == -1 && requestCode == 1) {
+//            Uri selectedImageUri = data.getData();
+//            String[] filePathColumn = {"_data"};
+//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+//            cursor.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+//            this.currentImageVew.setContentDescription(picturePath.toString());
+//        }
         if (resultCode == -1 && requestCode == 1) {
-            Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"_data"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());
+            Log.d("test", cursor.getString(nameIndex));
+
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 }

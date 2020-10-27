@@ -536,14 +536,14 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_retirement, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_retirement, entity).execute(new Void[0]);
                 /*JSONObject nameValuePair = new JSONObject();
                 nameValuePair.put("json_data", retirement_data);
 //                nameValuePair.put("a_photo[]", photo_array);
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.save_retirement, nameValuePair, 1, "post").execute(new Void[0]);*/
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_retirement, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_retirement, entity).execute(new Void[0]);
                 /*JSONObject nameValuePair = new JSONObject();
                 nameValuePair.put("json_data", retirement_data);
 //                nameValuePair.put("a_photo[]", photo_array);

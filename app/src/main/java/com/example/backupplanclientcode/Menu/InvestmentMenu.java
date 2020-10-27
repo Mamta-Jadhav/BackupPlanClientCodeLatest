@@ -2,6 +2,7 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -36,8 +37,10 @@ import com.example.backupplanclientcode.Utility.CompressImage;
 import com.google.gson.JsonObject;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +48,16 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 public class InvestmentMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
     private static final int SELECT_PICTURE = 1;
@@ -77,24 +85,24 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
     }
 
     private void checkAlreadySaveinvestment() {
-//        if (this.pref.getStringValue(Constant.investmentFlag, "").equalsIgnoreCase("1")) {
-//            this.btn_save.setText("Edit");
-//            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-//                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_investments));
-//            }
-//            if (this.connection.isConnectingToInternet()) {
-//                try {
-//                    JSONObject nameValuePair = new JSONObject();
-//                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-//                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//                    new GeneralTask(this, ServiceUrl.get_investment_detail, nameValuePair, 1, "post").execute(new Void[0]);
-//                } catch (Exception e) {
-//                }
-//                return;
-//            }
-//            Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
-//            return;
-//        }
+        if (this.pref.getStringValue(Constant.investmentFlag, "").equalsIgnoreCase("1")) {
+            this.btn_save.setText("Edit");
+            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_investments));
+            }
+            if (this.connection.isConnectingToInternet()) {
+                try {
+                    JSONObject nameValuePair = new JSONObject();
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                    new GeneralTask(this, ServiceUrl.get_investment_detail, nameValuePair, 1, "post").execute(new Void[0]);
+                } catch (Exception e) {
+                }
+                return;
+            }
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
+            return;
+        }
         this.actionBarTittle.setText(getResources().getString(R.string.menu_investments));
         addInvestmentLayout();
     }
@@ -175,6 +183,20 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
         }
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
+    }
+
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -224,14 +246,20 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
             this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
             Log.d("test", "selectedImage "+selectedImage);
             Log.d("test", "imageUri.getPath() "+imageUri.getPath());
-            /* Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"dat"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());*/
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
         }
     }
 
@@ -263,10 +291,11 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
                 json.put("benificial", edit_Benificery.getText().toString().trim());
                 json.put("year_purchase", edit_yearPurchase.getText().toString().trim());
                 if (!imgInvestment.getContentDescription().toString().trim().isEmpty()) {
-                    json.put("photo", imgInvestment.getContentDescription().toString());
-//                    entity.addPart("photo" + i, new FileBody(new File(imgInvestment.getContentDescription().toString()), "image/jpeg"));
-//                    nameValuePairs.add(new BasicNameValuePair("photo" + i, new FileBody(new File(imgInvestment.getContentDescription().toString()), "image/jpeg").getFile().getAbsolutePath()));
-                    nameValuePairs.add(new BasicNameValuePair("photo" + i, imgInvestment.getContentDescription().toString()));
+                    json.put("photo", "photo.png");
+                    File file = new File(imgInvestment.getContentDescription().toString());
+                    entity.addPart("photo[]",  new FileBody(file));
+//                    nameValuePairs.add(new BasicNameValuePair("photo" + i, new FileBody(new File(imgInvestment.getContentDescription().toString())).getFile().getAbsolutePath()));
+                    nameValuePairs.add(new BasicNameValuePair("photo", imgInvestment.getContentDescription().toString()));
                     Log.i("imgInvestment", imgInvestment.getContentDescription().toString());
                 } else {
                     json.put("photo", "");
@@ -287,7 +316,7 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
             } else {
                 nameValuePairs.add(new BasicNameValuePair("json_data", investment_data.toString()));
                 entity.addPart("json_data", new StringBody(investment_data.toString()));
-                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.save_investment, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.save_investment, entity);
                 saveProfileAsytask2.execute(new Void[0]);
             }
         } catch (Exception e) {

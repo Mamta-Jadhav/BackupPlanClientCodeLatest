@@ -2,10 +2,15 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +36,11 @@ import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,16 +150,67 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
     /* access modifiers changed from: protected */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode == -1 && requestCode == 1) {
+//            Uri selectedImageUri = data.getData();
+//            String[] filePathColumn = {"_data"};
+//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+//            cursor.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+//            this.currentImageVew.setContentDescription(picturePath.toString());
+//        }
         if (resultCode == -1 && requestCode == 1) {
-            Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"_data"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());
+            Log.d("test", cursor.getString(nameIndex));
+
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     @SuppressLint({"InflateParams"})
@@ -304,15 +364,15 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendAssetJson.toString()));
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg"));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path")), "image/jpeg").getFilename()));
+                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
                 Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
                 Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
             }
             if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_assets, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_assets, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_assets, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_assets, entity).execute(new Void[0]);
             }
             Log.e("send jon asset", sendAssetJson.toString());
         } catch (Exception e) {
@@ -336,10 +396,12 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 if (img_boat.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("b_photo", "");
                 } else {
-                    jsonbj.put("b_photo", "b_photo" + i);
+                    String[] arr = img_boat.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("b_photo", atr);
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_boat.getContentDescription().toString());
-                    item_map.put("image_name", "b_photo" + i);
+                    item_map.put("image_name", "b_photo[]");
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("boat_id", edit_boat_id.getText().toString().trim());
@@ -368,15 +430,17 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 EditText edit_Year = (EditText) view.findViewById(R.id.edit_Year);
                 EditText edit_Pair = (EditText) view.findViewById(R.id.edit_Pair);
                 EditText edit_Value = (EditText) view.findViewById(R.id.edit_Value);
-                EditText edit_boat_id = (EditText) view.findViewById(R.id.edit_boat_id);
+                EditText edit_boat_id = (EditText) view.findViewById(R.id.edit_autos_id);
                 ImageView img_auto = (ImageView) view.findViewById(R.id.img_auto);
                 if (img_auto.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("a_photo", "");
                 } else {
-                    jsonbj.put("a_photo", "a_photo" + i);
+                    String[] arr = img_auto.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("a_photo", atr);
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_auto.getContentDescription().toString());
-                    item_map.put("image_name", "a_photo" + i);
+                    item_map.put("image_name", "a_photo[]");
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("autos_id", edit_boat_id.getText().toString().trim());
@@ -410,10 +474,12 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 if (img_realEstate.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("r_photo", "");
                 } else {
-                    jsonbj.put("r_photo", "r_photo" + i);
+                    String[] arr = img_realEstate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("r_photo", atr);
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_realEstate.getContentDescription().toString());
-                    item_map.put("image_name", "r_photo" + i);
+                    item_map.put("image_name", "r_photo[]");
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("real_estate_id", edit_realEstateId.getText().toString().trim());

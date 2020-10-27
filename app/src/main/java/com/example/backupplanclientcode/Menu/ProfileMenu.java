@@ -647,90 +647,92 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             Log.i("Send Json data", this.json_profile.toString());
             for (int i = 0; i < this.list_images.size(); i++) {
                 File file = new File((String) ((HashMap) this.list_images.get(i)).get("image_path"));
-                multipartEntity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(file, "image/jpeg"));
+                multipartEntity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(file));
                 Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
                 Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
             }
             if (!this.imgPassport.getContentDescription().toString().isEmpty()) {
                 File file2 = new File(this.imgPassport.getContentDescription().toString());
-                multipartEntity.addPart("s_passport", new FileBody(file2, "image/jpeg"));
+                multipartEntity.addPart("s_passport", new FileBody(file2));
             }
             if (!this.imgBirthCertificate.getContentDescription().toString().isEmpty()) {
                 File file3 = new File(this.imgBirthCertificate.getContentDescription().toString());
-                multipartEntity.addPart("s_birth_certi", new FileBody(file3, "image/jpeg"));
+                multipartEntity.addPart("s_birth_certi", new FileBody(file3));
             }
             if (!this.imgSIN_SSN.getContentDescription().toString().equalsIgnoreCase("")) {
                 File file4 = new File(this.imgSIN_SSN.getContentDescription().toString());
-                FileBody fileBody = new FileBody(file4, "image/jpeg");
+                FileBody fileBody = new FileBody(file4);
                 multipartEntity.addPart("s_ssn", fileBody);
             }
             if (!this.imgImmigrationPapers.getContentDescription().toString().isEmpty()) {
                 File file5 = new File(this.imgImmigrationPapers.getContentDescription().toString());
-                multipartEntity.addPart("s_citizen_paper", new FileBody(file5, "image/jpeg"));
+                multipartEntity.addPart("s_citizen_paper", new FileBody(file5));
             }
             if (!this.imgWillPowerAttorney.getContentDescription().toString().isEmpty()) {
                 File file6 = new File(this.imgWillPowerAttorney.getContentDescription().toString());
-                FileBody fileBody2 = new FileBody(file6, "image/jpeg");
+                FileBody fileBody2 = new FileBody(file6);
                 multipartEntity.addPart("s_power_attorney", fileBody2);
             }
             if (!this.imgTrust.getContentDescription().toString().isEmpty()) {
                 File file7 = new File(this.imgTrust.getContentDescription().toString());
-                FileBody fileBody3 = new FileBody(file7, "image/jpeg");
+                FileBody fileBody3 = new FileBody(file7);
                 multipartEntity.addPart("s_trust", fileBody3);
             }
             if (!this.imgWarVeteranRecords.getContentDescription().toString().isEmpty()) {
                 File file8 = new File(this.imgWarVeteranRecords.getContentDescription().toString());
-                FileBody fileBody4 = new FileBody(file8, "image/jpeg");
+                FileBody fileBody4 = new FileBody(file8);
                 multipartEntity.addPart("s_war_record", fileBody4);
             }
             if (!this.imgOrganDonationRecords.getContentDescription().toString().isEmpty()) {
                 File file9 = new File(this.imgOrganDonationRecords.getContentDescription().toString());
-                multipartEntity.addPart("s_donation_rec", new FileBody(file9, "image/jpeg"));
+                multipartEntity.addPart("s_donation_rec", new FileBody(file9));
             }
             if (!this.imgMarriageCertificate.getContentDescription().toString().isEmpty()) {
                 File file10 = new File(this.imgMarriageCertificate.getContentDescription().toString());
-                multipartEntity.addPart("m_marriege_certi", new FileBody(file10, "image/jpeg"));
+                multipartEntity.addPart("m_marriege_certi", new FileBody(file10));
             }
             if (!this.imgPreMarriageAgreements.getContentDescription().toString().isEmpty()) {
                 File file11 = new File(this.imgPreMarriageAgreements.getContentDescription().toString());
-                multipartEntity.addPart("m_marriege_agree", new FileBody(file11, "image/jpeg"));
+                multipartEntity.addPart("m_marriege_agree", new FileBody(file11));
             }
             if (!this.imgMaintenanceRecords.getContentDescription().toString().isEmpty()) {
                 File file12 = new File(this.imgMaintenanceRecords.getContentDescription().toString());
-                multipartEntity.addPart("d_maintenance_rec", new FileBody(file12, "image/jpeg"));
+                multipartEntity.addPart("d_maintenance_rec", new FileBody(file12));
             }
             if (!this.imgAlimony.getContentDescription().toString().isEmpty()) {
                 File file13 = new File(this.imgAlimony.getContentDescription().toString());
-                multipartEntity.addPart("d_alimony", new FileBody(file13, "image/jpeg"));
+                multipartEntity.addPart("d_alimony", new FileBody(file13));
             }
             if (!this.imgChildCustodyRecords.getContentDescription().toString().isEmpty()) {
                 File file14 = new File(this.imgChildCustodyRecords.getContentDescription().toString());
-                multipartEntity.addPart("d_child_custody", new FileBody(file14, "image/jpeg"));
+                multipartEntity.addPart("d_child_custody", new FileBody(file14));
             }
             if (!this.imgDivorceDecreeCertificate.getContentDescription().toString().isEmpty()) {
                 File file15 = new File(this.imgDivorceDecreeCertificate.getContentDescription().toString());
-                multipartEntity.addPart("d_divorce_certi", new FileBody(file15, "image/jpeg"));
+                multipartEntity.addPart("d_divorce_certi", new FileBody(file15));
             }
             if (!this.imgSeparationAgreement.getContentDescription().toString().isEmpty()) {
                 File file16 = new File(this.imgSeparationAgreement.getContentDescription().toString());
-                multipartEntity.addPart("d_sepration_agree", new FileBody(file16, "image/jpeg"));
+                multipartEntity.addPart("d_sepration_agree", new FileBody(file16));
             }
             if (!this.imgDeathCertificate.getContentDescription().toString().isEmpty()) {
                 File file17 = new File(this.imgDeathCertificate.getContentDescription().toString());
-                FileBody fileBody5 = new FileBody(file17, "image/jpeg");
+                FileBody fileBody5 = new FileBody(file17);
                 multipartEntity.addPart("w_death_certi", fileBody5);
             }
+
             if (!this.imgWill.getContentDescription().toString().isEmpty()) {
-                FileBody fileBody6 = new FileBody(new File(this.imgWill.getContentDescription().toString()), "image/jpeg");
+                FileBody fileBody6 = new FileBody(new File(this.imgWill.getContentDescription().toString()));
                 multipartEntity.addPart("w_will", fileBody6);
             }
+
             if (!this.connection.isConnectingToInternet()) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("save")) {
-                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.save_profile, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.save_profile, multipartEntity);
                 saveProfileAsytask.execute(new Void[0]);
             } else {
-                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.edit_profile, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.edit_profile, multipartEntity);
                 saveProfileAsytask2.execute(new Void[0]);
             }
         } catch (Exception e) {
