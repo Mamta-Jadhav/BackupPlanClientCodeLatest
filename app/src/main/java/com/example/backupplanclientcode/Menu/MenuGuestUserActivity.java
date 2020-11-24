@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,9 +23,11 @@ import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.Database.DBHelper;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.firebase.auth.EmailAuthProvider;
 
 import java.util.ArrayList;
@@ -36,7 +39,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MenuGuestUserActivity extends Activity implements OnClickListener, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MenuGuestUserActivity extends Activity implements OnClickListener, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int KEY_DELETE_GUEST = 200;
     private static final int KEY_GET_GUESTS = 100;
     TextView actionBarTittle;
@@ -81,6 +87,20 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
     /* access modifiers changed from: protected */
     public void onResume() {
         super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+
         if (this.connection.isConnectingToInternet()) {
             getGuestUsers();
         } else {
@@ -137,7 +157,6 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
                 JSONObject nameValuePair = new JSONObject();
                 nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePair.put("new_password", this.editPassword.getText().toString().trim());
-                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.change_password, nameValuePair, 1, "post").execute(new Void[0]);
             } catch (Exception e) {
             }
@@ -174,7 +193,7 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         String userId = this.pref.getStringValue(Constant.user_id, "");
         try {
             JSONObject nameValuePairs = new JSONObject();
-            nameValuePairs.put("user_id", userId);
+            nameValuePairs.put("user_id", "2");// userId);
             nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
             new GeneralTask(this, ServiceUrl.get_guest_users, nameValuePairs, 100, "post").execute(new Void[0]);
         } catch (Exception e) {
@@ -232,15 +251,60 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
     public void deleteGuestUser(String guestUserId) {
         String userId = this.pref.getStringValue(Constant.user_id, "");
         try {
-//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-//            nameValuePairs.add(new BasicNameValuePair("user_id", userId));
-//            nameValuePairs.add(new BasicNameValuePair("guest_id", guestUserId));
             JSONObject nameValuePairs = new JSONObject();
             nameValuePairs.put("user_id", userId);
             nameValuePairs.put("guest_id", guestUserId);
-            nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
             new GeneralTask(this, ServiceUrl.delete_guest_user, nameValuePairs, 200, "post").execute(new Void[0]);
         } catch (Exception e) {
         }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
     }
 }

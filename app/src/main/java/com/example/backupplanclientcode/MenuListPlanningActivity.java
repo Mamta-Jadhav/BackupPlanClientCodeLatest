@@ -3,18 +3,24 @@ package com.example.backupplanclientcode;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.backupplanclientcode.Bugsense.Bugsense;
+import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.Menu.LongTermCareMenuActivity;
 import com.example.backupplanclientcode.Menu.MenuFuneralPlanning;
 import com.example.backupplanclientcode.Menu.RetirementMenuActivity;
 import com.example.backupplanclientcode.Menu.WillsAndWishActivity;
+import com.example.backupplanclientcode.Preference.SettingPreference;
 
-public class MenuListPlanningActivity extends Activity implements OnClickListener {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MenuListPlanningActivity extends Activity implements OnClickListener, LogOutTimerUtil.LogOutListener {
     TextView actionBarTittle;
     Button btn_back;
     Button btn_save;
@@ -22,11 +28,13 @@ public class MenuListPlanningActivity extends Activity implements OnClickListene
     LinearLayout menu_Retirement;
     LinearLayout menu_longTermCare;
     LinearLayout menu_will;
+    SettingPreference pref;
 
     /* access modifiers changed from: protected */
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.planning_menu_list_layout);
+        this.pref = new SettingPreference(getApplicationContext());
         new Bugsense().startBugsense(getApplicationContext());
         findViewId();
     }
@@ -66,6 +74,73 @@ public class MenuListPlanningActivity extends Activity implements OnClickListene
                 return;
             default:
                 return;
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

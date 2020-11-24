@@ -2,6 +2,7 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,9 +24,11 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
+import com.example.backupplanclientcode.loginActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +42,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class BillsToPayMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class BillsToPayMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     TextView actionBarTittle;
     JSONArray b_data;
     Button btn_back;
@@ -75,24 +81,24 @@ public class BillsToPayMenuActivity extends Activity implements OnClickListener,
     }
 
     private void checkAlredySaveAccount() {
-        if (!this.connection.isConnectingToInternet()) {
-            displayMessage(getResources().getString(R.string.connectionFailMessage));
-            show_all_layouts();
-        } else if (this.pref.getStringValue(Constant.billToPay, "").equalsIgnoreCase("1")) {
+//        if (!this.connection.isConnectingToInternet()) {
+//            displayMessage(getResources().getString(R.string.connectionFailMessage));
+//            show_all_layouts();
+//        } else if (this.pref.getStringValue(Constant.billToPay, "").equalsIgnoreCase("1")) {
             this.btn_save.setText("Edit");
             if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_bill_to_pay));
             }
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_bill_to_pay_detail, nameValuePair, 2, "post").execute(new Void[0]);
             } catch (Exception e) {
             }
-        } else {
-            show_all_layouts();
-        }
+//        } else {
+//            show_all_layouts();
+//        }
     }
 
     private void show_all_layouts() {
@@ -755,8 +761,6 @@ public class BillsToPayMenuActivity extends Activity implements OnClickListener,
             Log.i("send json obj :", sendJson.toString());
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
@@ -839,5 +843,72 @@ public class BillsToPayMenuActivity extends Activity implements OnClickListener,
 
     private void displayMessage(String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 }

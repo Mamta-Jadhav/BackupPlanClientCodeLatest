@@ -34,11 +34,13 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.Utility;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.firebase.analytics.FirebaseAnalytics.Param;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
@@ -60,7 +62,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class InternetMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class InternetMenuActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final String DIGITAL = "DIGITAL";
     private static final int SELECT_PICTURE = 1;
     private static final String SOCIAL = "SOCIAL";
@@ -140,20 +145,20 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         String stringValue = this.pref.getStringValue(Constant.internet_id, "");
         String stringValue2 = this.pref.getStringValue(Constant.user_id, "");
         this.actionBarTittle.setText(getResources().getString(R.string.menu_internet));
-        if (!this.pref.getStringValue(Constant.internet_id, "").equalsIgnoreCase("0") && !this.pref.getStringValue(Constant.internet_id, "").isEmpty() && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        if (!this.pref.getStringValue(Constant.internet_id, "").isEmpty() && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.btn_save.setText("Save");
             try {
                 if (!this.connection.isConnectingToInternet()) {
                     displayMessage(getResources().getString(R.string.connectionFailMessage));
                 } else if (this.TYPE == SOCIAL) {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-                    nameValuePair.put("internet_id", this.pref.getStringValue(Constant.internet_id, ""));
+                    nameValuePair.put("user_id", "2");// this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("internet_id", "2");//this.pref.getStringValue(Constant.internet_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_internet_detail, nameValuePair, 1, "post").execute(new Void[0]);
                 } else if (this.TYPE == DIGITAL) {
                     JSONObject nameValuePair2 = new JSONObject();
-                    nameValuePair2.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair2.put("user_id", "2"); //this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair2.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_digital_detail, nameValuePair2, 2, "post").execute(new Void[0]);
                 }
@@ -307,8 +312,8 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-                nameValuePair.put("internet_id", this.pref.getStringValue(Constant.internet_id, ""));
+                nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("internet_id", "2");//this.pref.getStringValue(Constant.internet_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_internet_detail, nameValuePair, 1, "post").execute(new Void[0]);
             } catch (Exception e) {
@@ -329,7 +334,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("user_id", "2"); //this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_digital_detail, nameValuePair, 2, "post").execute(new Void[0]);
             } catch (Exception e) {
@@ -472,7 +477,6 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
             JSONObject request_data = new JSONObject();
             JSONObject request_data1 = new JSONObject();
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             request_data.put("user_id", Integer.valueOf(this.pref.getStringValue(Constant.user_id, "0")));
             if (this.TYPE == SOCIAL) {
                 request_data.put("internet_id", Integer.valueOf(this.pref.getStringValue(Constant.internet_id, "0")));
@@ -491,10 +495,8 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
                 }
             } else {
                 request_data.put("digital_data", internetAccountsJarray);
-                nameValuePairs.add(new BasicNameValuePair("digital_data", internetAccountsJarray.toString()));
             }
             request_data1.put("json_data", request_data.toString());
-            Log.d("json_data", request_data.toString());
             entity.addPart("json_data", new StringBody(request_data.toString()));
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
@@ -503,7 +505,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
                 new GeneralTask(this, ServiceUrl.save_internet, request_data1, 2, "post").execute(new Void[0]);
 //                new SaveProfileAsytask(this, ServiceUrl.save_internet, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_digital, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_digital, entity).execute(new Void[0]);
             }
         } catch (Exception e) {
             Log.d("~~~~~~Save-E~~~~~>", "" + e.getLocalizedMessage());
@@ -575,5 +577,72 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
 
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 }

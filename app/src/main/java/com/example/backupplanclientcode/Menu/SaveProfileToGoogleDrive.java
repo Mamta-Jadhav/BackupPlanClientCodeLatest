@@ -23,10 +23,12 @@ import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.HttpLoader.HttpLoader;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.TextViewerActivity;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -58,7 +60,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SaveProfileToGoogleDrive extends Activity implements ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class SaveProfileToGoogleDrive extends Activity implements ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int REQUEST_CODE_CREATOR = 2;
     private static final int REQUEST_CODE_SIGN_IN = 0;
     private static final String TAG = "drive-quickstart";
@@ -207,11 +212,11 @@ public class SaveProfileToGoogleDrive extends Activity implements ResponseListen
     private void getProfile() {
         if (!this.connection.isConnectingToInternet()) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
-        } else if (!this.pref.getStringValue(Constant.profile_id, "").equalsIgnoreCase("0") &&!this.pref.getStringValue(Constant.profile_id, "").isEmpty() && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        } else if (!this.pref.getStringValue(Constant.profile_id, "").isEmpty() && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             try {
                 JSONObject nameValuePairs = new JSONObject();
 //                nameValuePairs.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
-                nameValuePairs.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePairs.put("user_id", "2");///this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_profile_detail, nameValuePairs, 2, "post").execute(new Void[0]);
             } catch (Exception e) {
@@ -255,5 +260,72 @@ public class SaveProfileToGoogleDrive extends Activity implements ResponseListen
             driveData3 = (((((driveData3 + "Pet Name: " + petObj.getString("p_name").toString() + IOUtils.LINE_SEPARATOR_UNIX) + "Pet Type: " + petObj.getString("p_type").toString() + IOUtils.LINE_SEPARATOR_UNIX) + "Date of Birth: " + petObj.getString("p_dob").toString() + IOUtils.LINE_SEPARATOR_UNIX) + "Veterinarian: " + petObj.getString("p_veterinarian").toString() + IOUtils.LINE_SEPARATOR_UNIX) + "Special need: " + petObj.getString("p_sepcial_need").toString() + IOUtils.LINE_SEPARATOR_UNIX) + "\n\n";
         }
         return driveData3;
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
     }
 }

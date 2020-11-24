@@ -2,8 +2,10 @@ package com.example.backupplanclientcode.Menu;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -16,10 +18,12 @@ import com.example.backupplanclientcode.Asyntask.GeneralTask.ResponseListener_Ge
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.Database.DBHelper;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.Validation;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.firebase.auth.EmailAuthProvider;
 
 import java.util.ArrayList;
@@ -29,7 +33,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-public class MenuAddNewUser extends Activity implements OnClickListener, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MenuAddNewUser extends Activity implements OnClickListener, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int KEY_ADD_GUEST = 300;
     private static final int KEY_EDIT_GUEST = 400;
     TextView actionBarTittle;
@@ -114,7 +121,6 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
                 nameValuePairs.put("username", this.edit_Username.getText().toString());
                 nameValuePairs.put("email", this.edit_email.getText().toString());
                 nameValuePairs.put("password", this.edit_Password.getText().toString());
-                nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.edit_guest_user, nameValuePairs, 400, "post").execute(new Void[0]);
             } catch (Exception e) {
             }
@@ -136,7 +142,6 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
                 nameValuePairs.put("username", this.edit_Username.getText().toString());
                 nameValuePairs.put("email", this.edit_email.getText().toString());
                 nameValuePairs.put("password", this.edit_Password.getText().toString());
-                nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.add_guest_user, nameValuePairs, 300, "post").execute(new Void[0]);
             }catch (Exception e){}
         }
@@ -188,6 +193,73 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
                 Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if(foreGround){
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+
+        }else {
+            logout = "true";
+        }
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if(logout.equals("true")){
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+            startActivity(new Intent(getApplicationContext(), loginActivity.class));
+            finish();
         }
     }
 }

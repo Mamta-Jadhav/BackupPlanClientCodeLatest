@@ -1,111 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:id="@+id/petLayouts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/removepetIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_margin="5dp"
-                android:src="@drawable/ic_close1"
-                android:tag="" />
-
-            <EditText
-                android:id="@+id/edit_petid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_top"
-                android:hint="@string/hint_Name"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light"
-                android:visibility="gone" />
-
-            <EditText
-                android:id="@+id/edit_petname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_top"
-                android:hint="@string/hint_Name"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light" />
-
-            <EditText
-                android:id="@+id/edit_petType"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_center"
-                android:hint="@string/hint_PetType"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light" />
-
-            <EditText
-                android:id="@+id/edit_petDateOfBirth"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_center"
-                android:hint="@string/hint_DateofBirth"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light" />
-
-            <EditText
-                android:id="@+id/edit_petVeterinarian"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_center"
-                android:hint="@string/hint_Veterinarian"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light" />
-
-            <EditText
-                android:id="@+id/edit_petSpecialneeds"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/bg_input_bottom"
-                android:hint="@string/hint_SpecialNeeds"
-                android:padding="5dp"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                 android:textColor="@color/black"
-                android:textColorHint="@color/button_material_light" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@+id/petLayouts" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
+        <LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageView android:layout_gravity="right" android:id="@+id/removepetIcon" android:tag="" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="5dp" android:src="@drawable/ic_close1"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petid" android:background="@drawable/bg_input_top" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Name" android:singleLine="true"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petname" android:background="@drawable/bg_input_top" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Name" android:singleLine="true"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petType" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_PetType" android:singleLine="true"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petDateOfBirth" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_DateofBirth" android:singleLine="true"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petVeterinarian" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Veterinarian" android:singleLine="true"/>
+            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_petSpecialneeds" android:background="@drawable/bg_input_bottom" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_SpecialNeeds" android:singleLine="true"/>
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
