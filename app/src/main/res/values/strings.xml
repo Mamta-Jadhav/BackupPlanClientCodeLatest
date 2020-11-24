@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="abc_action_bar_home_description">Navigate home</string>
     <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
     <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
@@ -114,7 +114,7 @@
     <string name="tedpermission_confirm">Confirm</string>
     <string name="tedpermission_setting">Setting</string>
     <string name="APIKEY">AIzaSyDn6pn0jXhIe43ugUcQhkcSW2-b1Tihfuc</string>
-    <string name="INC1">Employer’s Pension Plan</string>
+    <string name="INC1">Employer \'s Pension Plan</string>
     <string name="INC10">RRSP/ RRIF Income</string>
     <string name="INC11">Annuity Income</string>
     <string name="INC12">Profit-sharing Fund pay out</string>
@@ -125,12 +125,12 @@
     <string name="INC17">Savings Account interest</string>
     <string name="INC18">Investment Income</string>
     <string name="INC19">Sale of Business - shares</string>
-    <string name="INC2">Employer’s Pension Plan / Union Pension Plan</string>
-    <string name="INC20">Life Insurance – Investment growth Account Value</string>
+    <string name="INC2">Employer\'s Pension Plan / Union Pension Plan</string>
+    <string name="INC20" tools:ignore="TypographyDashes">Life Insurance Investment growth Account Value</string>
     <string name="INC21">Other Income such as Social welfare or UIC/ Alimony</string>
     <string name="INC3">Self Directed Pension Plan</string>
     <string name="INC4">Canada Pension Plan/ Disability Pension Plan</string>
-    <string name="INC5">Veteran’s Pension Plan</string>
+    <string name="INC5">Veteran\'s Pension Plan</string>
     <string name="INC6">Old Age Security</string>
     <string name="INC7">Guaranteed Income Supplement</string>
     <string name="INC8">Other Retirement Income</string>
@@ -173,7 +173,7 @@
     <string name="cast_invalid_stream_duration_text">--:--</string>
     <string name="cast_invalid_stream_position_text">--:--</string>
     <string name="connectionFailMessage">Please check your internet connection.</string>
-    <string name="download_tip">TIP: If you don\9 have a current will: GO HERE TO DOWNLOAD</string>
+    <string name="download_tip">TIP: If you don\'t have a current will: GO HERE TO DOWNLOAD</string>
     <string name="emergencyTip1">TIP: LIST YOUR IN TOWN CONTACTS AS EMERGENCY CONTACT AS 1-2-3\10\10LIST YOUR OUT OF TOWN CONTACTS AS EMERGENCY CONTACT 4-5-6\10\10OUT OF TOWN CONTACTS- WORK PHONE-CELL PHONE-EMAIL-HOME ADDRESS</string>
     <string name="emergencyTip2">TIP: PRACTICE YOUR EVACUATION PLANS CHANGE THE BATTERIES IN YOUR SMOKE ALARM AND CARBON MONOXIDE DETECTOR</string>
     <string name="gsm_sender">3919008659</string>

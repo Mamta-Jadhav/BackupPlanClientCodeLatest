@@ -29,17 +29,21 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +55,10 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-public class DocumentsMenu extends Activity implements OnClickListener, ResponseListener_General, ResponseListerProfile {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class DocumentsMenu extends Activity implements OnClickListener, ResponseListener_General, ResponseListerProfile, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     Button btn_back;
@@ -635,6 +642,7 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
@@ -675,9 +683,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             this.document_data.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
             if (this.yesNo_BirthCertificate.isChecked()) {
                 this.document_data.put("is_birth_certi", "1");
-                this.document_data.put("birth_certi", "birth_certi");
                 if (!this.img_brith_certificate.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("birth_certi", new FileBody(new File(this.img_brith_certificate.getContentDescription().toString())));
+                    String[] arr = this.img_brith_certificate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("birth_certi", atr);
+                    if (this.img_brith_certificate.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_brith_certificate.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("birth_certi[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("birth_certi[]", new FileBody(new File(this.img_brith_certificate.getContentDescription().toString())));
+                    }
                     Log.i("img_brith_certificate", this.img_brith_certificate.getContentDescription().toString());
                 }
             } else {
@@ -686,9 +704,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_SOCIAL_SECURITY.isChecked()) {
                 this.document_data.put("is_sin", "1");
-                this.document_data.put("sin", "sin");
                 if (!this.img_SOCIAL_SECURITY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("sin", new FileBody(new File(this.img_SOCIAL_SECURITY.getContentDescription().toString())));
+                    String[] arr = this.img_SOCIAL_SECURITY.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("sin", atr);
+                    if (this.img_SOCIAL_SECURITY.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_SOCIAL_SECURITY.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("sin[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("sin[]", new FileBody(new File(this.img_SOCIAL_SECURITY.getContentDescription().toString())));
+                    }
                     Log.i("img_SOCIAL_SECURITY", this.img_SOCIAL_SECURITY.getContentDescription().toString());
                 }
             } else {
@@ -697,9 +725,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_MARRIAGE_CERTIFICATE.isChecked()) {
                 this.document_data.put("is_merr_certi", "1");
-                this.document_data.put("merr_certi", "merr_certi");
                 if (!this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("merr_certi", new FileBody(new File(this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString())));
+                    String[] arr = this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("merr_certi", atr);
+                    if (this.img_MARRIAGE_CERTIFICATE.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("merr_certi[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("merr_certi[]", new FileBody(new File(this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString())));
+                    }
                     Log.i("MARRIAGE_CRTFCATE", this.img_MARRIAGE_CERTIFICATE.getContentDescription().toString());
                 }
             } else {
@@ -708,9 +746,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_PASSPORTS.isChecked()) {
                 this.document_data.put("is_passport", "1");
-                this.document_data.put("passport", "passport");
                 if (!this.img_PASSPORTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("passport", new FileBody(new File(this.img_PASSPORTS.getContentDescription().toString())));
+                    String[] arr = this.img_PASSPORTS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("passport", atr);
+                    if (this.img_PASSPORTS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_PASSPORTS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("passport[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("passport[]", new FileBody(new File(this.img_PASSPORTS.getContentDescription().toString())));
+                    }
                     Log.i("img_PASSPORTS", this.img_PASSPORTS.getContentDescription().toString());
                 }
             } else {
@@ -719,9 +767,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_PRE_MARRIAGE_AGREEMENTS.isChecked()) {
                 this.document_data.put("is_pre_merr_agree", "1");
-                this.document_data.put("pre_merr_agree", "pre_merr_agree");
                 if (!this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("pre_merr_agree", new FileBody(new File(this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString())));
+                    String[] arr = this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("pre_merr_agree", atr);
+                    if (this.img_PRE_MARRIAGE_AGREEMENTS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("pre_merr_agree[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("pre_merr_agree[]", new FileBody(new File(this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString())));
+                    }
                     Log.i("PRE_AGREEMENTS", this.img_PRE_MARRIAGE_AGREEMENTS.getContentDescription().toString());
                 }
             } else {
@@ -730,9 +788,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_NEXUS.isChecked()) {
                 this.document_data.put("is_nexus", "1");
-                this.document_data.put("nexus", "nexus");
                 if (!this.img_NEXUS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("nexus", new FileBody(new File(this.img_NEXUS.getContentDescription().toString())));
+                    String[] arr = this.img_NEXUS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("nexus", atr);
+                    if (this.img_NEXUS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_NEXUS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("nexus[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("nexus[]", new FileBody(new File(this.img_NEXUS.getContentDescription().toString())));
+                    }
                     Log.i("img_NEXUS", this.img_NEXUS.getContentDescription().toString());
                 }
             } else {
@@ -741,9 +809,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_CITIZENSHIP_PAPERS.isChecked()) {
                 this.document_data.put("is_citizen_paper", "1");
-                this.document_data.put("citizen_paper", "citizen_paper");
                 if (!this.img_CITIZENSHIP_PAPERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("citizen_paper", new FileBody(new File(this.img_CITIZENSHIP_PAPERS.getContentDescription().toString())));
+                    String[] arr = this.img_CITIZENSHIP_PAPERS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("citizen_paper", atr);
+                    if (this.img_CITIZENSHIP_PAPERS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_CITIZENSHIP_PAPERS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("citizen_paper[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("citizen_paper[]", new FileBody(new File(this.img_CITIZENSHIP_PAPERS.getContentDescription().toString())));
+                    }
                     Log.i("img_CITIZENSHIP_PAPERS", this.img_CITIZENSHIP_PAPERS.getContentDescription().toString());
                 }
             } else {
@@ -752,9 +830,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_ALIMONY.isChecked()) {
                 this.document_data.put("is_alimony", "1");
-                this.document_data.put("alimony", "alimony");
                 if (!this.img_ALIMONY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("alimony", new FileBody(new File(this.img_ALIMONY.getContentDescription().toString())));
+                    String[] arr = this.img_ALIMONY.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("alimony", atr);
+                    if (this.img_ALIMONY.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_ALIMONY.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("alimony[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("alimony[]", new FileBody(new File(this.img_ALIMONY.getContentDescription().toString())));
+                    }
                     Log.i("img_ALIMONY", this.img_ALIMONY.getContentDescription().toString());
                 }
             } else {
@@ -763,9 +851,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_MAINTENANCE.isChecked()) {
                 this.document_data.put("is_maintance", "1");
-                this.document_data.put("maintance", "maintance");
                 if (!this.img_MAINTENANCE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("maintance", new FileBody(new File(this.img_MAINTENANCE.getContentDescription().toString())));
+                    String[] arr = this.img_MAINTENANCE.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("maintance", atr);
+                    if (this.img_MAINTENANCE.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_MAINTENANCE.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("maintance[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("maintance[]", new FileBody(new File(this.img_MAINTENANCE.getContentDescription().toString())));
+                    }
                     Log.i("img_MAINTENANCE", this.img_MAINTENANCE.getContentDescription().toString());
                 }
             } else {
@@ -774,9 +872,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_CUSTODY_ORDERS.isChecked()) {
                 this.document_data.put("is_custody_order", "1");
-                this.document_data.put("custody_order", "custody_order");
                 if (!this.img_CUSTODY_ORDERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("custody_order", new FileBody(new File(this.img_CUSTODY_ORDERS.getContentDescription().toString())));
+                    String[] arr = this.img_CUSTODY_ORDERS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("custody_order", atr);
+                    if (this.img_CUSTODY_ORDERS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_CUSTODY_ORDERS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("custody_order[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("custody_order[]", new FileBody(new File(this.img_CUSTODY_ORDERS.getContentDescription().toString())));
+                    }
                     Log.i("img_CUSTODY_ORDERS", this.img_CUSTODY_ORDERS.getContentDescription().toString());
                 }
             } else {
@@ -785,9 +893,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_IMMIGRATION_PAPERS.isChecked()) {
                 this.document_data.put("is_immig_paper", "1");
-                this.document_data.put("immig_paper", "immig_paper");
                 if (!this.img_IMMIGRATION_PAPERS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("immig_paper", new FileBody(new File(this.img_IMMIGRATION_PAPERS.getContentDescription().toString())));
+                    String[] arr = this.img_IMMIGRATION_PAPERS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("immig_paper", atr);
+                    if (this.img_IMMIGRATION_PAPERS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_IMMIGRATION_PAPERS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("immig_paper[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("immig_paper[]", new FileBody(new File(this.img_IMMIGRATION_PAPERS.getContentDescription().toString())));
+                    }
                     Log.i("img_IMMIGRATION_PAPERS", this.img_IMMIGRATION_PAPERS.getContentDescription().toString());
                 }
             } else {
@@ -796,9 +914,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_DIVORCE_DECREE.isChecked()) {
                 this.document_data.put("is_divorce_agree", "1");
-                this.document_data.put("divorce_agree", "divorce_agree");
                 if (!this.img_DIVORCE_DECREE.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("divorce_agree", new FileBody(new File(this.img_DIVORCE_DECREE.getContentDescription().toString())));
+                    String[] arr = this.img_DIVORCE_DECREE.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("divorce_agree", atr);
+                    if (this.img_DIVORCE_DECREE.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_DIVORCE_DECREE.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("divorce_agree[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("divorce_agree[]", new FileBody(new File(this.img_DIVORCE_DECREE.getContentDescription().toString())));
+                    }
                     Log.i("img_DIVORCE_DECREE", this.img_DIVORCE_DECREE.getContentDescription().toString());
                 }
             } else {
@@ -807,9 +935,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_SEPARATION_AGREEMENT.isChecked()) {
                 this.document_data.put("is_sepration_agree", "1");
-                this.document_data.put("sepration_agree", "sepration_agree");
                 if (!this.img_SEPARATION_AGREEMENT.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("sepration_agree", new FileBody(new File(this.img_SEPARATION_AGREEMENT.getContentDescription().toString())));
+                    String[] arr = this.img_SEPARATION_AGREEMENT.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("sepration_agree", atr);
+                    if (this.img_SEPARATION_AGREEMENT.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_SEPARATION_AGREEMENT.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("sepration_agree[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("sepration_agree[]", new FileBody(new File(this.img_SEPARATION_AGREEMENT.getContentDescription().toString())));
+                    }
                     Log.i("SPRTION_AGREMENT", this.img_SEPARATION_AGREEMENT.getContentDescription().toString());
                 }
             } else {
@@ -818,9 +956,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_CEMETERY.isChecked()) {
                 this.document_data.put("is_cemetery", "1");
-                this.document_data.put("cemetery", "cemetery");
                 if (!this.img_CEMETERY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("cemetery", new FileBody(new File(this.img_CEMETERY.getContentDescription().toString())));
+                    String[] arr = this.img_CEMETERY.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("cemetery", atr);
+                    if (this.img_CEMETERY.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_CEMETERY.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("cemetery[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("cemetery[]", new FileBody(new File(this.img_CEMETERY.getContentDescription().toString())));
+                    }
                     Log.i("img_CEMETERY", this.img_CEMETERY.getContentDescription().toString());
                 }
             } else {
@@ -829,9 +977,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNoFUNERAL_ARRANGEMENTS.isChecked()) {
                 this.document_data.put("is_pre_paid_fun_arra", "1");
-                this.document_data.put("pre_paid_fun_arra", "pre_paid_fun_arra");
                 if (!this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("pre_paid_fun_arra", new FileBody(new File(this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString())));
+                    String[] arr = this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("pre_paid_fun_arra", atr);
+                    if (this.img_FUNERAL_ARRANGEMENTS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("pre_paid_fun_arra[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("pre_paid_fun_arra[]", new FileBody(new File(this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString())));
+                    }
                     Log.i("FUNERAL_ARNGS", this.img_FUNERAL_ARRANGEMENTS.getContentDescription().toString());
                 }
             } else {
@@ -840,9 +998,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_WAR_VETERAN_RECORDS.isChecked()) {
                 this.document_data.put("is_war_vet_rec", "1");
-                this.document_data.put("war_vet_rec", "war_vet_rec");
                 if (!this.img_WAR_VETERAN_RECORDS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("war_vet_rec", new FileBody(new File(this.img_WAR_VETERAN_RECORDS.getContentDescription().toString())));
+                    String[] arr = this.img_WAR_VETERAN_RECORDS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("war_vet_rec", atr);
+                    if (this.img_WAR_VETERAN_RECORDS.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_WAR_VETERAN_RECORDS.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("war_vet_rec[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("war_vet_rec[]", new FileBody(new File(this.img_WAR_VETERAN_RECORDS.getContentDescription().toString())));
+                    }
                     Log.i("img_WAR_VETERAN_RECORDS", this.img_WAR_VETERAN_RECORDS.getContentDescription().toString());
                 }
             } else {
@@ -851,9 +1019,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_YOUR_WALLTE_COPY.isChecked()) {
                 this.document_data.put("is_wollet_card", "1");
-                this.document_data.put("wollet_card", "wollet_card");
                 if (!this.img_YOUR_WALLTE_COPY.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("wollet_card", new FileBody(new File(this.img_YOUR_WALLTE_COPY.getContentDescription().toString())));
+                    String[] arr = this.img_YOUR_WALLTE_COPY.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("wollet_card", atr);
+                    if (this.img_YOUR_WALLTE_COPY.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(this.img_YOUR_WALLTE_COPY.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("wollet_card[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("wollet_card[]", new FileBody(new File(this.img_YOUR_WALLTE_COPY.getContentDescription().toString())));
+                    }
                     Log.i("img_YOUR_WALLTE_COPY", this.img_YOUR_WALLTE_COPY.getContentDescription().toString());
                 }
             } else {
@@ -862,9 +1040,19 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
             if (this.yesNo_YOUR_KEYS.isChecked()) {
                 this.document_data.put("is_take_pic", "1");
-                this.document_data.put("take_pic", "take_pic");
                 if (!this.img_YOUR_KEYS.getContentDescription().toString().equalsIgnoreCase("")) {
-                    entity.addPart("take_pic", new FileBody(new File(this.img_YOUR_KEYS.getContentDescription().toString())));
+                    String[] arr = this.img_YOUR_KEYS.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    this.document_data.put("take_pic", atr);
+                    if (this.img_YOUR_KEYS.getTag().toString().equalsIgnoreCase("1")) {
+//                    URL domain = new URL(this.img_RegistrationRecord.getContentDescription().toString());
+//                    String destFolder = getCacheDir().getAbsolutePath();
+//                    FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                    Log.d("test", "Path : " + domain.toURI().getPath());
+//                    entity.addPart("r_photo[]", new FileBody(new File(destFolder + "/" + atr)));
+                    } else {
+                        entity.addPart("take_pic[]", new FileBody(new File(this.img_YOUR_KEYS.getContentDescription().toString())));
+                    }
                     Log.i("img_YOUR_KEYS", this.img_YOUR_KEYS.getContentDescription().toString());
                 }
             } else {
@@ -875,16 +1063,36 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             this.document_data.put("r_location", this.edit_registrationRecord.getText().toString().trim());
             this.document_data.put("r_party_access", this.edit_3rdparty.getText().toString().trim());
             if (!this.img_RegistrationRecord.getContentDescription().toString().equalsIgnoreCase("")) {
-                entity.addPart("r_photo", new FileBody(new File(this.img_RegistrationRecord.getContentDescription().toString())));
+                String[] arr = this.img_RegistrationRecord.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                this.document_data.put("r_photo", atr);
+                if (this.img_RegistrationRecord.getTag().toString().equalsIgnoreCase("1")) {
+//                    URL domain = new URL(this.img_RegistrationRecord.getContentDescription().toString());
+//                    String destFolder = getCacheDir().getAbsolutePath();
+//                    FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                    Log.d("test", "Path : " + domain.toURI().getPath());
+//                    entity.addPart("r_photo[]", new FileBody(new File(destFolder + "/" + atr)));
+                } else {
+                    entity.addPart("r_photo[]", new FileBody(new File(this.img_RegistrationRecord.getContentDescription().toString())));
+                }
                 Log.i("img_RegistrationRecord", this.img_RegistrationRecord.getContentDescription().toString());
-                this.document_data.put("r_photo", "r_photo");
             } else {
                 this.document_data.put("r_photo", "");
             }
             this.document_data.put("fp_location", this.edit_PROF_SAFE.getText().toString().trim());
             if (!this.img_PROOF_SAFE.getContentDescription().toString().equalsIgnoreCase("")) {
-                this.document_data.put("fp_photo", "fp_photo");
-                entity.addPart("fp_photo", new FileBody(new File(this.img_PROOF_SAFE.getContentDescription().toString())));
+                String[] arr = this.img_PROOF_SAFE.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                this.document_data.put("fp_photo", atr);
+                if (this.img_PROOF_SAFE.getTag().toString().equalsIgnoreCase("1")) {
+//                    URL domain = new URL(this.img_PROOF_SAFE.getContentDescription().toString());
+//                    String destFolder = getCacheDir().getAbsolutePath();
+//                    FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                    Log.d("test", "Path : " + domain.toURI().getPath());
+//                    entity.addPart("fp_photo[]", new FileBody(new File(destFolder + "/" + atr)));
+                } else {
+                    entity.addPart("fp_photo[]", new FileBody(new File(this.img_PROOF_SAFE.getContentDescription().toString())));
+                }
                 Log.i("img_PROOF_SAFE", this.img_PROOF_SAFE.getContentDescription().toString());
             } else {
                 this.document_data.put("fp_photo", "");
@@ -923,8 +1131,10 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
                 Toast.makeText(getApplicationContext(), "Something wrong", Toast.LENGTH_SHORT).show();
             }
             if (response.has("success") && response.getString("success").toString().trim().equalsIgnoreCase("1")) {
-                this.pref.setStringValue(Constant.document_id, response.getString("document_id"));
-                this.pref.setStringValue(Constant.document_flag,"1");
+                if (response.has("document_id")) {
+                    this.pref.setStringValue(Constant.document_id, response.getString("document_id"));
+                }
+//                this.pref.setStringValue(Constant.document_flag,"1");
                 finish();
             }
         } catch (Exception e) {
@@ -970,62 +1180,102 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
         try {
             if (json.has("birth_certi")) {
                 UrlImageViewHelper.setUrlDrawable(this.img_brith_certificate, json.getString("birth_certi").toString().trim(), (int) R.drawable.img);
+                this.img_brith_certificate.setContentDescription(json.getString("birth_certi"));
+                this.img_brith_certificate.setTag("1");
             }
             if (json.has("sin")) {
+                this.img_SOCIAL_SECURITY.setContentDescription(json.getString("sin"));
+                this.img_SOCIAL_SECURITY.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_SOCIAL_SECURITY, json.getString("sin").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("merr_certi")) {
+                this.img_MARRIAGE_CERTIFICATE.setContentDescription(json.getString("merr_certi"));
+                this.img_MARRIAGE_CERTIFICATE.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_MARRIAGE_CERTIFICATE, json.getString("merr_certi").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("passport")) {
+                this.img_PASSPORTS.setContentDescription(json.getString("passport"));
+                this.img_PASSPORTS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_PASSPORTS, json.getString("passport").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("pre_merr_agree")) {
+                this.img_PRE_MARRIAGE_AGREEMENTS.setContentDescription(json.getString("pre_merr_agree"));
+                this.img_PRE_MARRIAGE_AGREEMENTS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_PRE_MARRIAGE_AGREEMENTS, json.getString("pre_merr_agree").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("nexus")) {
+                this.img_NEXUS.setContentDescription(json.getString("nexus"));
+                this.img_NEXUS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_NEXUS, json.getString("nexus").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("citizen_paper")) {
+                this.img_CITIZENSHIP_PAPERS.setContentDescription(json.getString("citizen_paper"));
+                this.img_CITIZENSHIP_PAPERS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_CITIZENSHIP_PAPERS, json.getString("citizen_paper").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("alimony")) {
+                this.img_ALIMONY.setContentDescription(json.getString("alimony"));
+                this.img_ALIMONY.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_ALIMONY, json.getString("alimony").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("maintance")) {
+                this.img_MAINTENANCE.setContentDescription(json.getString("maintance"));
+                this.img_MAINTENANCE.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_MAINTENANCE, json.getString("maintance").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("custody_order")) {
+                this.img_CUSTODY_ORDERS.setContentDescription(json.getString("custody_order"));
+                this.img_CUSTODY_ORDERS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_CUSTODY_ORDERS, json.getString("custody_order").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("immig_paper")) {
+                this.img_IMMIGRATION_PAPERS.setContentDescription(json.getString("immig_paper"));
+                this.img_IMMIGRATION_PAPERS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_IMMIGRATION_PAPERS, json.getString("immig_paper").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("divorce_agree")) {
+                this.img_DIVORCE_DECREE.setContentDescription(json.getString("divorce_agree"));
+                this.img_DIVORCE_DECREE.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_DIVORCE_DECREE, json.getString("divorce_agree").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("sepration_agree")) {
+                this.img_SEPARATION_AGREEMENT.setContentDescription(json.getString("sepration_agree"));
+                this.img_SEPARATION_AGREEMENT.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_SEPARATION_AGREEMENT, json.getString("sepration_agree").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("cemetery")) {
+                this.img_CEMETERY.setContentDescription(json.getString("cemetery"));
+                this.img_CEMETERY.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_CEMETERY, json.getString("cemetery").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("pre_paid_fun_arra")) {
+                this.img_FUNERAL_ARRANGEMENTS.setContentDescription(json.getString("pre_paid_fun_arra"));
+                this.img_FUNERAL_ARRANGEMENTS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_FUNERAL_ARRANGEMENTS, json.getString("pre_paid_fun_arra").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("war_vet_rec")) {
+                this.img_WAR_VETERAN_RECORDS.setContentDescription(json.getString("war_vet_rec"));
+                this.img_WAR_VETERAN_RECORDS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_WAR_VETERAN_RECORDS, json.getString("war_vet_rec").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("wollet_card")) {
+                this.img_YOUR_WALLTE_COPY.setContentDescription(json.getString("wollet_card"));
+                this.img_YOUR_WALLTE_COPY.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_YOUR_WALLTE_COPY, json.getString("wollet_card").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("take_pic")) {
+                this.img_YOUR_KEYS.setContentDescription(json.getString("take_pic"));
+                this.img_YOUR_KEYS.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_YOUR_KEYS, json.getString("take_pic").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("r_photo")) {
+                this.img_RegistrationRecord.setContentDescription(json.getString("r_photo"));
+                this.img_RegistrationRecord.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_RegistrationRecord, json.getString("r_photo").toString().trim(), (int) R.drawable.img);
             }
             if (json.has("fp_photo")) {
+                this.img_PROOF_SAFE.setContentDescription(json.getString("fp_photo"));
+                this.img_PROOF_SAFE.setTag("1");
                 UrlImageViewHelper.setUrlDrawable(this.img_PROOF_SAFE, json.getString("fp_photo").toString().trim(), (int) R.drawable.img);
             }
         } catch (Exception e) {
@@ -1164,6 +1414,79 @@ public class DocumentsMenu extends Activity implements OnClickListener, Response
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

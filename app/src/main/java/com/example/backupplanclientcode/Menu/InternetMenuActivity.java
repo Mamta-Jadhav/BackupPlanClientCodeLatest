@@ -6,6 +6,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -14,9 +15,11 @@ import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Images.Media;
 import android.provider.MediaStore.Video;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -47,6 +50,9 @@ import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +62,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
@@ -97,7 +104,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         new Bugsense().startBugsense(getApplicationContext());
         try {
             findviewId();
-//            checkAlredySaveAccount();
+            checkAlredySaveAccount();
         } catch (Exception e) {
             Log.d("~~~~~~~>", "" + e.getLocalizedMessage());
         }
@@ -145,22 +152,24 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         String stringValue = this.pref.getStringValue(Constant.internet_id, "");
         String stringValue2 = this.pref.getStringValue(Constant.user_id, "");
         this.actionBarTittle.setText(getResources().getString(R.string.menu_internet));
-        if (!this.pref.getStringValue(Constant.internet_id, "").isEmpty() && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        if (!this.pref.getStringValue(Constant.internet_id, "").equalsIgnoreCase("0") && !this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.btn_save.setText("Save");
             try {
                 if (!this.connection.isConnectingToInternet()) {
                     displayMessage(getResources().getString(R.string.connectionFailMessage));
                 } else if (this.TYPE == SOCIAL) {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", "2");// this.pref.getStringValue(Constant.user_id, ""));
-                    nameValuePair.put("internet_id", "2");//this.pref.getStringValue(Constant.internet_id, ""));
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("internet_id", this.pref.getStringValue(Constant.internet_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_internet_detail, nameValuePair, 1, "post").execute(new Void[0]);
+                    this.btn_save.setText("Edit");
                 } else if (this.TYPE == DIGITAL) {
                     JSONObject nameValuePair2 = new JSONObject();
-                    nameValuePair2.put("user_id", "2"); //this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair2.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair2.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_digital_detail, nameValuePair2, 2, "post").execute(new Void[0]);
+                    this.btn_save.setText("Edit");
                 }
             } catch (Exception e) {
 
@@ -178,12 +187,15 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         }
         if (responseCode == 1) {
             try {
+                response = response.getJSONObject("internet_data");
                 findViewById(R.id.layout_internet_social_header).setVisibility(View.VISIBLE);
                 this.edit_compId.setText(response.getString("internet_id"));
                 this.edit_ComPassword.setText(response.getString("c_password"));
                 this.edit_comLocation.setText(response.getString("c_location"));
-                populateAccounts(response.getJSONArray("internet_data"));
                 UrlImageViewHelper.setUrlDrawable(this.imageView, response.getString("c_photo"), (int) R.drawable.img);
+                this.imageView.setTag("1");
+                this.imageView.setContentDescription(response.getString("c_photo"));
+                populateAccounts(response.getJSONArray("account"));
                 if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                     this.edit_ComPassword.setEnabled(false);
                     this.edit_comLocation.setEnabled(false);
@@ -205,11 +217,11 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
     private void populateAccounts(JSONArray accountsJarray) throws JSONException {
         LinearLayout layoutNewAccounts = (LinearLayout) findViewById(R.id.layoutAccounts);
         layoutNewAccounts.removeAllViews();
-        for (int i = 0; i < accountsJarray.length(); i++) {
-            JSONObject accountsJobj = accountsJarray.getJSONObject(i);
+//        for (int i = 0; i < accountsJarray.length(); i++) {
+//            JSONObject accountsJobj = accountsJarray.getJSONObject(i);
             final View child = getLayoutInflater().inflate(R.layout.layout_internet_account, null);
-            ((TextView) child.findViewById(R.id.text_new_field_heading)).setText(accountsJobj.getString("accout_type"));
-            populateAccountDetails(accountsJobj.getJSONArray("accounts"), child);
+            ((TextView) child.findViewById(R.id.text_new_field_heading)).setText("Email");//accountsJobj.getString("accout_type"));
+            populateAccountDetails(accountsJarray, child);
             child.findViewById(R.id.layout_add_new_field).setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     if (!InternetMenuActivity.this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
@@ -229,7 +241,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
                 }
             });
             layoutNewAccounts.addView(child);
-        }
+//        }
     }
 
     private void populateAccountDetails(JSONArray accountJarray, View accountView) throws JSONException {
@@ -239,7 +251,8 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
             final View fieldsView = getLayoutInflater().inflate(R.layout.layout_internet, null);
             EditText edit_id = (EditText) fieldsView.findViewById(R.id.edit_id);
             EditText edit_AccName = (EditText) fieldsView.findViewById(R.id.edit_AccName);
-            edit_AccName.setText(accountJobj.getString("account"));
+            edit_AccName.setText(accountJobj.getString("e_account"));
+            edit_AccName.setTag(accountJobj.getString("email_id"));
             EditText edit_Username = (EditText) fieldsView.findViewById(R.id.edit_Username);
             edit_Username.setText(accountJobj.getString("username"));
             EditText edit_Password = (EditText) fieldsView.findViewById(R.id.edit_Password);
@@ -283,6 +296,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
     }
 
     public void on_ProfileSuccess(JSONObject response) {
+        Log.d("test", response.toString());
         try {
             if (response.has("message")) {
                 displayMessage(response.getString("message").toString());
@@ -312,10 +326,11 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
-                nameValuePair.put("internet_id", "2");//this.pref.getStringValue(Constant.internet_id, ""));
+                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("internet_id", this.pref.getStringValue(Constant.internet_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_internet_detail, nameValuePair, 1, "post").execute(new Void[0]);
+                this.btn_save.setText("Edit");
             } catch (Exception e) {
 
             }
@@ -334,9 +349,10 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", "2"); //this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_digital_detail, nameValuePair, 2, "post").execute(new Void[0]);
+                this.btn_save.setText("Edit");
             } catch (Exception e) {
             }
             return;
@@ -350,12 +366,14 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
     public void onAddNewAccountButtonClick(View view) {
         if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             findViewById(R.id.layout_add_new_acc).setVisibility(View.VISIBLE);
-            ((EditText) findViewById(R.id.txt_acc_name)).setText("");
+//            ((EditText) findViewById(R.id.txt_acc_name)).setText("");
         }
     }
 
     public void onAddNewSocialAccount(View view) {
-        String socialAccountName = ((EditText) findViewById(R.id.txt_acc_name)).getText().toString();
+        EditText text = ((EditText) findViewById(R.id.txt_acc_name));
+        text.setEnabled(false);
+        String socialAccountName = text.getText().toString();
         if (socialAccountName.length() > 0) {
             findViewById(R.id.layout_add_new_acc).setVisibility(View.GONE);
             addNewAccountParentField(socialAccountName);
@@ -421,6 +439,7 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
             accountJobj.put("user_id", Integer.valueOf(this.pref.getStringValue(Constant.user_id, "")));
             accountJobj.put("internet_id", Integer.valueOf(this.pref.getStringValue(Constant.internet_id, "")));
             accountJobj.put("account", ((EditText) child.findViewById(R.id.edit_AccName)).getText().toString());
+            accountJobj.put("account_id", ((EditText) child.findViewById(R.id.edit_AccName)).getTag().toString());
             accountJobj.put("username", ((EditText) child.findViewById(R.id.edit_Username)).getText().toString());
             accountJobj.put("password", ((EditText) child.findViewById(R.id.edit_Password)).getText().toString());
             int edit_id = Integer.valueOf(((EditText) child.findViewById(R.id.edit_id)).getTag().toString() == null ? "0" : ((EditText) child.findViewById(R.id.edit_id)).getTag().toString()).intValue();
@@ -475,7 +494,6 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
     public void saveInternetData(JSONArray internetAccountsJarray) {
         try {
             JSONObject request_data = new JSONObject();
-            JSONObject request_data1 = new JSONObject();
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
             request_data.put("user_id", Integer.valueOf(this.pref.getStringValue(Constant.user_id, "0")));
             if (this.TYPE == SOCIAL) {
@@ -484,26 +502,41 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
                 request_data.put("c_location", this.edit_comLocation.getText().toString().trim());
                 request_data.put("internet_data", internetAccountsJarray);
                 if (this.imageView.getContentDescription().toString().trim().isEmpty()) {
+                    request_data.put("c_photo", "");
+                    request_data.put("is_file", "0");
                     Log.i("c_photo", this.imageView.getContentDescription().toString());
                 } else {
+                    String[] arr = this.imageView.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
                     request_data.put("delete_internet_image", this.deleteImage);
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    Utility.getBitmapFromPath(this.imageView.getContentDescription().toString()).compress(CompressFormat.JPEG, 75, bos);
-                    entity.addPart("c_photo", new ByteArrayBody(bos.toByteArray(), "c_photo.jpg"));
-                    request_data1.put("c_photo", this.imageView.getContentDescription().toString());
-                    Log.i("c_photo", this.imageView.getContentDescription().toString());
+//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                    Utility.getBitmapFromPath(this.imageView.getContentDescription().toString()).compress(CompressFormat.JPEG, 75, bos);
+                    if (this.imageView.getTag().toString().equalsIgnoreCase("0")) {
+                        entity.addPart("c_photo[]", new FileBody(new File(this.imageView.getContentDescription().toString())));
+                        request_data.put("c_photo", atr);
+                        request_data.put("is_file", "1");
+                        Log.i("c_photo tag 0", this.imageView.getContentDescription().toString());
+                    }else {
+                        request_data.put("c_photo", atr);
+                        request_data.put("is_file", "0");
+                        Log.i("c_photo tag 1", this.imageView.getContentDescription().toString());
+                    }
                 }
             } else {
                 request_data.put("digital_data", internetAccountsJarray);
             }
-            request_data1.put("json_data", request_data.toString());
             entity.addPart("json_data", new StringBody(request_data.toString()));
+            Log.e("internet/digital", request_data.toString());
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.TYPE == SOCIAL) {
-                request_data1.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-                new GeneralTask(this, ServiceUrl.save_internet, request_data1, 2, "post").execute(new Void[0]);
-//                new SaveProfileAsytask(this, ServiceUrl.save_internet, entity).execute(new Void[0]);
+                if (this.btn_save.getText().toString().trim().equalsIgnoreCase("save")) {
+                    Log.d("test", "Here1");
+                    new SaveProfileAsytask(this, ServiceUrl.save_internet, entity).execute(new Void[0]);
+                }else{
+                    Log.d("test", "Here2");
+                    new SaveProfileAsytask(this, ServiceUrl.edit_internet, entity).execute(new Void[0]);
+                }
             } else {
                 new SaveProfileAsytask(this, ServiceUrl.save_digital, entity).execute(new Void[0]);
             }
@@ -517,16 +550,60 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == -1 && requestCode == 1) {
             try {
-                Uri selectedImageUri = data.getData();
-                String picturePath = getFilePath(this, selectedImageUri);
-                Log.d("~~~~~~~~~~>", "" + selectedImageUri + IOUtils.LINE_SEPARATOR_UNIX + picturePath);
-                this.imageView.setImageBitmap(BitmapFactory.decodeFile(new File(picturePath).getAbsolutePath()));
-                this.imageView.setContentDescription(picturePath.toString());
+                final Uri imageUri = data.getData();
+                InputStream imageStream = null;
+                try {
+                    imageStream = getContentResolver().openInputStream(imageUri);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                Log.d("test", cursor.getString(nameIndex));
+
+                this.imageView.setImageBitmap(selectedImage);
+                this.imageView.setContentDescription(cursor.getString(nameIndex));
+                // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+                Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+                // CALL THIS METHOD TO GET THE ACTUAL PATH
+                File finalFile = new File(getRealPathFromURI(tempUri));
+
+                System.out.println(finalFile.getAbsoluteFile());
+                System.out.println(finalFile.getName());
+                try {
+                    System.out.println(finalFile.getCanonicalPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                this.imageView.setContentDescription(finalFile.getPath());
+                this.imageView.setTag("0");
+
+                Log.d("test", "selectedImage " + selectedImage);
+                Log.d("test", "imageUri.getPath() " + imageUri.getPath());
                 this.deleteImage = 0;
             } catch (Exception e) {
                 Log.d("~~~~~E~~~~~>", "" + e.getLocalizedMessage());
             }
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     @SuppressLint({"NewApi"})
@@ -582,17 +659,18 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -601,16 +679,19 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -620,7 +701,6 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -634,15 +714,18 @@ public class InternetMenuActivity extends Activity implements OnClickListener, R
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

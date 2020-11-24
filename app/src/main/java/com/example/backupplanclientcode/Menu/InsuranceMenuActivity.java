@@ -2,10 +2,15 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +41,11 @@ import com.example.backupplanclientcode.Utility.CompressImage;
 import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -113,7 +122,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
     }
 
     private void checkAlredySaveAccount() {
-        if (this.pref.getStringValue(Constant.insurance_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        if (this.pref.getStringValue(Constant.insurance_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.insurance_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.actionBarTittle.setText(getResources().getString(R.string.menu_insurance));
             addHouseLayout(this.firstTimeHouse, null, false);
             addAutoMobile(this.firstTimeAutoMobile, null, false);
@@ -129,9 +138,13 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             if (this.connection.isConnectingToInternet()) {
                 try {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
-                    nameValuePair.put("insurance_id", "2");//this.pref.getStringValue(Constant.insurance_id, ""));
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+//                    nameValuePair.put("insurance_id", this.pref.getStringValue(Constant.insurance_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                    Log.d("test", nameValuePair.toString());
+                    Log.d("test", this.pref.getStringValue(Constant.user_id, ""));
+                    Log.d("test", this.pref.getStringValue(Constant.insurance_id, ""));
+                    Log.d("test", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_insurance_detail, nameValuePair, 1, "post").execute(new Void[0]);
                 } catch (Exception e) {
                 }
@@ -246,7 +259,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             }
             ToggleButton isPhotoTaken = (ToggleButton) view.findViewById(R.id.isPhotoTaken);
             ToggleButton isPhotoTakenReceipt = (ToggleButton) view.findViewById(R.id.isPhotoTakenReceipt);
-            isPhotoTaken.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+            isPhotoTakenReceipt.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         imgReceipt.setVisibility(View.VISIBLE);
@@ -277,6 +290,8 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     isPhotoTaken.setChecked(false);
                 }
                 UrlImageViewHelper.setUrlDrawable(imgReceipt, response.getString("h_photo").toString().trim(), (int) R.drawable.img);
+                imgReceipt.setContentDescription(response.getString("h_photo").toString().trim());
+                imgReceipt.setTag("1");
                 removeIcon.setTag(response.getString("household_id").toString().trim());
             }
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
@@ -352,6 +367,8 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     isPolicy.setChecked(false);
                 }
                 UrlImageViewHelper.setUrlDrawable(imgPolicy, response.getString("a_photo").toString().trim(), (int) R.drawable.img);
+                imgPolicy.setContentDescription(response.getString("a_photo").toString().trim());
+                imgPolicy.setTag("1");
                 removeIcon.setTag(response.getString("automobile_id").toString().trim());
             }
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
@@ -421,11 +438,21 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             this.json.put("personal_id", this.editPersonal_id.getText().toString().trim());
             if (this.p_photo.getContentDescription().toString().isEmpty()) {
                 this.json.put("p_photo", "");
+                this.json.put("is_file", "0");
             } else {
-                this.json.put("p_photo", "p_photo");
+                String[] arr = this.p_photo.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                this.json.put("p_photo", atr);
                 HashMap<String, String> item_map = new HashMap<>();
                 item_map.put("image_path", this.p_photo.getContentDescription().toString());
-                item_map.put("image_name", "p_photo");
+                item_map.put("image_name", "p_photo[]");
+                item_map.put("tag", this.p_photo.getTag().toString());
+
+                if (this.p_photo.getTag().toString().equalsIgnoreCase("1")) {
+                    this.json.put("is_file", "0");
+                } else {
+                    this.json.put("is_file", "1");
+                }
                 this.list_images.add(item_map);
             }
             sendJson.put("insurance_data", this.json);
@@ -435,12 +462,16 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
-                Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
-                Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
-            }
 
+                if (this.list_images.get(i).get("tag").toString().equalsIgnoreCase("1")) {
+
+                } else {
+                    entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                    nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
+                    Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
+                    Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                }
+            }
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
@@ -463,7 +494,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 if (!iv.getContentDescription().toString().isEmpty()) {
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "Coverage" + i);
+                    item_map.put("image_name", "travel_coverage_image[]");
+                    item_map.put("tag", iv.getTag().toString());
+//                    item_map.put("image_name", "Coverage" + i);
                     this.list_images.add(item_map);
                     if (travel_coverage_image.equalsIgnoreCase("")) {
                         travel_coverage_image = travel_coverage_image.concat("Coverage" + i);
@@ -496,7 +529,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 if (!iv.getContentDescription().toString().isEmpty()) {
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "itinerary" + i);
+                    item_map.put("image_name", "travel_itinerary_image[]");
+                    item_map.put("tag", iv.getTag().toString());
+//                    item_map.put("image_name", "itinerary" + i);
                     this.list_images.add(item_map);
                     if (travel_itinerary_image.equalsIgnoreCase("")) {
                         travel_itinerary_image = travel_itinerary_image.concat("itinerary" + i);
@@ -540,7 +575,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 if (!iv.getContentDescription().toString().isEmpty()) {
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "ill_image" + i);
+//                    item_map.put("image_name", "ill_image" + i);
+                    item_map.put("image_name", "p_photo[]");
+                    item_map.put("tag", iv.getTag().toString());
                     this.list_images.add(item_map);
                     if (ill_image.equalsIgnoreCase("")) {
                         ill_image = ill_image.concat("ill_image" + i);
@@ -585,7 +622,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 if (!iv.getContentDescription().toString().isEmpty()) {
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "ins_image" + i);
+//                    item_map.put("image_name", "ins_image" + i);
+                    item_map.put("image_name", "p_photo[]");
+                    item_map.put("tag", iv.getTag().toString());
                     this.list_images.add(item_map);
                     if (ins_image.equalsIgnoreCase("")) {
                         ins_image = ins_image.concat("ins_image" + i);
@@ -622,15 +661,20 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 jsonbj.put("a_model", editModel.getText().toString().trim());
                 jsonbj.put("a_year", edityear.getText().toString().trim());
                 if (isPolicy.isChecked()) {
-                    jsonbj.put("a_is_photo_policy", "1");
                     ImageView imgPolicy = (ImageView) view.findViewById(R.id.imgPolicy);
                     if (imgPolicy.getContentDescription().toString().isEmpty()) {
                         jsonbj.put("a_photo", "");
+                        jsonbj.put("a_is_photo_policy", "0");
                     } else {
-                        jsonbj.put("a_photo", "a_photo" + i);
+                        String[] arr = this.p_photo.getContentDescription().toString().split("/");
+                        String atr = arr[arr.length - 1];
+                        jsonbj.put("a_photo", atr);
+                        jsonbj.put("a_is_photo_policy", "1");
                         HashMap<String, String> item_map = new HashMap<>();
                         item_map.put("image_path", imgPolicy.getContentDescription().toString());
-                        item_map.put("image_name", "a_photo" + i);
+//                        item_map.put("image_name", "p_photo[]");
+                        item_map.put("image_name", "a_photo[]");
+                        item_map.put("tag", imgPolicy.getTag().toString());
                         this.list_images.add(item_map);
                     }
                 } else {
@@ -662,25 +706,30 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 } else {
                     jsonbj.put("h_is_receipt", "0");
                 }
-                if (isPhotoTakenReceipt.isChecked()) {
-                    jsonbj.put("h_is_photo_receipt", "1");
-                } else {
-                    jsonbj.put("h_is_photo_receipt", "0");
-                }
                 if (isPhotoTaken.isChecked()) {
                     jsonbj.put("h_is_item", "1");
+                } else {
+                    jsonbj.put("h_is_item", "0");
+                }
+                if (isPhotoTakenReceipt.isChecked()) {
                     ImageView imgReceipt = (ImageView) view.findViewById(R.id.imgReceipt);
                     if (imgReceipt.getContentDescription().toString().isEmpty()) {
                         jsonbj.put("h_photo", "");
+                        jsonbj.put("h_is_photo_receipt", "0");
                     } else {
-                        jsonbj.put("h_photo", "h_photo" + i);
+                        String[] arr = imgReceipt.getContentDescription().toString().split("/");
+                        String atr = arr[arr.length - 1];
+                        jsonbj.put("h_photo", atr);
+                        jsonbj.put("h_is_photo_receipt", "1");
                         HashMap<String, String> item_map = new HashMap<>();
                         item_map.put("image_path", imgReceipt.getContentDescription().toString());
-                        item_map.put("image_name", "h_photo" + i);
+                        item_map.put("image_name", "h_photo[]");
+                        item_map.put("tag", imgReceipt.getTag().toString());
+//                        item_map.put("image_name", "p_photo[]");
                         this.list_images.add(item_map);
                     }
                 } else {
-                    jsonbj.put("h_is_item", "0");
+                    jsonbj.put("h_is_photo_receipt", "0");
                 }
                 this.houseJsonArray.put(jsonbj);
                 i++;
@@ -705,7 +754,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     InsuranceMenuActivity.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 3);
                 }
             });
-            iv.setTag("image");
+//            iv.setTag("image");
             final Button btn_remove = (Button) view.findViewById(R.id.btn_remove);
             btn_remove.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -722,7 +771,8 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             if (flag) {
                 UrlImageViewHelper.setUrlDrawable(iv, response.getString("c_photo").toString().trim(), (int) R.drawable.img);
                 btn_remove.setTag(response.getString("travel_c_id").toString().trim());
-                iv.setTag(response.getString("travel_c_id").toString().trim());
+                iv.setContentDescription(response.getString("c_photo").toString().trim());
+                iv.setTag("1");
             }
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 btn_remove.setVisibility(View.GONE);
@@ -760,7 +810,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     InsuranceMenuActivity.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 2);
                 }
             });
-            iv.setTag("image");
+//            iv.setTag("image");
             final Button btn_remove = (Button) view.findViewById(R.id.btn_remove);
             btn_remove.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -777,7 +827,8 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             if (flag) {
                 UrlImageViewHelper.setUrlDrawable(iv, response.getString("t_photo").toString().trim(), (int) R.drawable.img);
                 btn_remove.setTag(response.getString("travel_i_id").toString().trim());
-                iv.setTag(response.getString("travel_i_id").toString().trim());
+                iv.setTag("1");
+                iv.setContentDescription(response.getString("t_photo").toString().trim());
             }
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 iv.setEnabled(false);
@@ -815,7 +866,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     InsuranceMenuActivity.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 4);
                 }
             });
-            iv.setTag("image");
+//            iv.setTag("image");
             final Button btn_remove = (Button) view.findViewById(R.id.btn_remove);
             btn_remove.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -832,8 +883,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             });
             if (flag) {
                 UrlImageViewHelper.setUrlDrawable(iv, response.getString("image").toString().trim(), (int) R.drawable.img);
+                iv.setContentDescription(response.getString("image").toString().trim());
+                iv.setTag("1");
                 btn_remove.setTag(response.getString("image_id").toString().trim());
-                iv.setTag(response.getString("image_id").toString().trim());
             }
             btn_remove.setVisibility(View.GONE);
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
@@ -871,7 +923,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                     InsuranceMenuActivity.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 5);
                 }
             });
-            iv.setTag("image");
+//            iv.setTag("image");
             final Button btn_remove = (Button) view.findViewById(R.id.btn_remove);
             btn_remove.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -888,8 +940,9 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
             });
             if (flag) {
                 UrlImageViewHelper.setUrlDrawable(iv, response.getString("image").toString().trim(), (int) R.drawable.img);
+                iv.setContentDescription(response.getString("image").toString().trim());
                 btn_remove.setTag(response.getString("image_id").toString().trim());
-                iv.setTag(response.getString("image_id").toString().trim());
+                iv.setTag("1");
             }
             if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 btn_remove.setVisibility(View.GONE);
@@ -918,95 +971,299 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == -1 && requestCode == 1) {
-            Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"_data"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            Uri selectedImageUri = data.getData();
+//            String[] filePathColumn = {"_data"};
+//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+//            cursor.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());
+            Log.d("test", cursor.getString(nameIndex));
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+//            this.currentImageVew.setContentDescription(picturePath.toString());
         }
         if (resultCode == -1 && requestCode == 2) {
-            Uri selectedImageUri2 = data.getData();
-            String[] filePathColumn2 = {"_data"};
-            Cursor cursor2 = getContentResolver().query(selectedImageUri2, filePathColumn2, null, null, null);
-            cursor2.moveToFirst();
-            String picturePath2 = cursor2.getString(cursor2.getColumnIndex(filePathColumn2[0]));
-            cursor2.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri2.toString(), picturePath2));
+//            Uri selectedImageUri2 = data.getData();
+//            String[] filePathColumn2 = {"_data"};
+//            Cursor cursor2 = getContentResolver().query(selectedImageUri2, filePathColumn2, null, null, null);
+//            cursor2.moveToFirst();
+//            String picturePath2 = cursor2.getString(cursor2.getColumnIndex(filePathColumn2[0]));
+//            cursor2.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri2.toString(), picturePath2));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            this.currentImageVew.setContentDescription(finalFile.getPath());
             if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
                 Log.e("equalsIgnoreCase(image)", "......if");
                 if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
                     Log.e("!equalsIgnoreCase()", "......if");
-                    this.currentImageVew.setContentDescription(picturePath2.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     addNewImageItinerary(null, false);
                 } else {
-                    this.currentImageVew.setContentDescription(picturePath2.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     Log.e("!equalsIgnoreCase()", "......else");
                 }
             }
         }
         if (resultCode == -1 && requestCode == 3) {
-            Uri selectedImageUri3 = data.getData();
-            String[] filePathColumn3 = {"_data"};
-            Cursor cursor3 = getContentResolver().query(selectedImageUri3, filePathColumn3, null, null, null);
-            cursor3.moveToFirst();
-            String picturePath3 = cursor3.getString(cursor3.getColumnIndex(filePathColumn3[0]));
-            cursor3.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri3.toString(), picturePath3));
+//            Uri selectedImageUri3 = data.getData();
+//            String[] filePathColumn3 = {"_data"};
+//            Cursor cursor3 = getContentResolver().query(selectedImageUri3, filePathColumn3, null, null, null);
+//            cursor3.moveToFirst();
+//            String picturePath3 = cursor3.getString(cursor3.getColumnIndex(filePathColumn3[0]));
+//            cursor3.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri3.toString(), picturePath3));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            this.currentImageVew.setContentDescription(finalFile.getPath());
             if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
                 Log.e("equalsIgnoreCase(image)", "......if");
                 if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
                     Log.e("!equalsIgnoreCase()", "......if");
-                    this.currentImageVew.setContentDescription(picturePath3.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     addimageCovrage(null, false);
                 } else {
-                    this.currentImageVew.setContentDescription(picturePath3.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     Log.e("!equalsIgnoreCase()", "......else");
                 }
             }
         }
         if (resultCode == -1 && requestCode == 4) {
-            Uri selectedImageUri4 = data.getData();
-            String[] filePathColumn4 = {"_data"};
-            Cursor cursor4 = getContentResolver().query(selectedImageUri4, filePathColumn4, null, null, null);
-            cursor4.moveToFirst();
-            String picturePath4 = cursor4.getString(cursor4.getColumnIndex(filePathColumn4[0]));
-            cursor4.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri4.toString(), picturePath4));
+//            Uri selectedImageUri4 = data.getData();
+//            String[] filePathColumn4 = {"_data"};
+//            Cursor cursor4 = getContentResolver().query(selectedImageUri4, filePathColumn4, null, null, null);
+//            cursor4.moveToFirst();
+//            String picturePath4 = cursor4.getString(cursor4.getColumnIndex(filePathColumn4[0]));
+//            cursor4.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri4.toString(), picturePath4));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            this.currentImageVew.setContentDescription(finalFile.getPath());
             if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
                 Log.e("equalsIgnoreCase(image)", "......if");
                 if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
                     Log.e("!equalsIgnoreCase()", "......if");
-                    this.currentImageVew.setContentDescription(picturePath4.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     addNewImagePolicy1(null, false);
                 } else {
-                    this.currentImageVew.setContentDescription(picturePath4.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     Log.e("!equalsIgnoreCase()", "......else");
                 }
             }
         }
         if (resultCode == -1 && requestCode == 5) {
-            Uri selectedImageUri5 = data.getData();
-            String[] filePathColumn5 = {"_data"};
-            Cursor cursor5 = getContentResolver().query(selectedImageUri5, filePathColumn5, null, null, null);
-            cursor5.moveToFirst();
-            String picturePath5 = cursor5.getString(cursor5.getColumnIndex(filePathColumn5[0]));
-            cursor5.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri5.toString(), picturePath5));
+//            Uri selectedImageUri5 = data.getData();
+//            String[] filePathColumn5 = {"_data"};
+//            Cursor cursor5 = getContentResolver().query(selectedImageUri5, filePathColumn5, null, null, null);
+//            cursor5.moveToFirst();
+//            String picturePath5 = cursor5.getString(cursor5.getColumnIndex(filePathColumn5[0]));
+//            cursor5.close();
+//            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri5.toString(), picturePath5));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            this.currentImageVew.setContentDescription(finalFile.getPath());  
             if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
                 Log.e("equalsIgnoreCase(image)", "......if");
                 if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
                     Log.e("!equalsIgnoreCase()", "......if");
-                    this.currentImageVew.setContentDescription(picturePath5.toString());
+                    this.currentImageVew.setContentDescription(finalFile.getPath());
                     addNewImagePolicy2(null, false);
                     return;
                 }
-                this.currentImageVew.setContentDescription(picturePath5.toString());
+                this.currentImageVew.setContentDescription(finalFile.getPath());
                 Log.e("!equalsIgnoreCase()", "......else");
             }
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     public void on_GeneralSuccess(JSONObject response, int responseCode) {
@@ -1071,14 +1328,14 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 this.editCmp2.setText(json2.getString("i_company_name"));
                 this.editPolicy2.setText(json2.getString("i_policy"));
                 this.editPayment2.setText(json2.getString("i_payment"));
-                JSONArray jsonArray = json2.getJSONArray("illness_policy_images");
+                /*JSONArray jsonArray = json2.getJSONArray("illness_policy_images");
                 if (json2.has("illness_policy_images")) {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         addNewImagePolicy2(jsonArray.getJSONObject(i), true);
                     }
                 } else {
                     addNewImagePolicy2(null, false);
-                }
+                }*/
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1102,19 +1359,21 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
                 this.editCmp1.setText(json2.getString("i_company_name"));
                 this.editPolicy1.setText(json2.getString("i_policy"));
                 this.editPayment1.setText(json2.getString("i_payment"));
-                JSONArray jsonArray = json2.getJSONArray("insurance_policy_images");
+                /*JSONArray jsonArray = json2.getJSONArray("insurance_policy_images");
                 if (json2.has("insurance_policy_images")) {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         addNewImagePolicy1(jsonArray.getJSONObject(i), true);
                     }
                 } else {
                     addNewImagePolicy1(null, false);
-                }
+                }*/
             }
             this.editPersonal_id.setText(insurance_data.getString("personal_id"));
             this.editPolicy.setText(insurance_data.getString("policy"));
             this.editCompany.setText(insurance_data.getString("company"));
             UrlImageViewHelper.setUrlDrawable(this.p_photo, insurance_data.getString("p_photo").toString().trim(), (int) R.drawable.img);
+            this.p_photo.setContentDescription(insurance_data.getString("p_photo").toString().trim());
+            this.p_photo.setTag("1");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1146,6 +1405,7 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
 
     public void on_ProfileSuccess(JSONObject response) {
         try {
+            Log.d("test", "Resp : " + response);
             if (response.has("message")) {
                 displayMessage(response.getString("message").toString());
             }
@@ -1167,17 +1427,18 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -1186,16 +1447,19 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -1205,7 +1469,6 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -1219,15 +1482,18 @@ public class InsuranceMenuActivity extends Activity implements OnClickListener, 
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

@@ -44,8 +44,11 @@ import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +112,7 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
     }
 
     private void checkAlredySaveAccount() {
-//        if (this.pref.getStringValue(Constant.accountFlag, "").equalsIgnoreCase("1")) {
+        if (this.pref.getStringValue(Constant.accountFlag, "").equalsIgnoreCase("1")) {
             this.btn_save.setText("Edit");
             if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_account));
@@ -117,19 +120,19 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
             if (this.connection.isConnectingToInternet()) {
                 try {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_account_detail, nameValuePair, 2, "post").execute(new Void[0]);
                 } catch (Exception e) {
                 }
                 return;
-//            }
-//            displayMessage(getResources().getString(R.string.connectionFailMessage));
-//            addAccountLayout();
-//            addLineOfCreditsLayout();
-//            addCreditCardslayout();
-//            addWalletLayout();
-//            return;
+            }
+            displayMessage(getResources().getString(R.string.connectionFailMessage));
+            addAccountLayout();
+            addLineOfCreditsLayout();
+            addCreditCardslayout();
+            addWalletLayout();
+            return;
         }
         this.actionBarTittle.setText(getResources().getString(R.string.menu_account));
         addAccountLayout();
@@ -253,6 +256,7 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
@@ -406,9 +410,22 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
             sendJson.put("account_data", this.accountJson);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
-                Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
-                Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                String str = (String) ((HashMap) this.list_images.get(i)).get("image_path");
+                String tag = (String) ((HashMap) this.list_images.get(i)).get("tag");
+                String[] arr = str.split("/");
+                String atr = arr[arr.length - 1];
+                if (tag.equalsIgnoreCase("1")) {
+//                    URL domain = new URL(str);
+//                    String destFolder = getCacheDir().getAbsolutePath();
+//                    FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                    Log.d("test", "Path : " + domain.toURI().getPath());
+//                    entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File(destFolder + "/" + atr)));
+                } else {
+                    entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File(str)));
+
+                    Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
+                    Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                }
             }
             Log.i("list of images", this.list_images.toString());
             Log.e("Sending json object", sendJson.toString());
@@ -438,11 +455,21 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                 jsonbj.put("w_number", edit_Number.getText().toString().trim());
                 if (imgWallet.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("w_photo", "");
+                    jsonbj.put("is_w_photo", 0);
                 } else {
-                    jsonbj.put("w_photo", "image" + i);
+                    String[] arr = imgWallet.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("w_photo", atr);
+                    if (imgWallet.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_w_photo", 0);
+                    } else {
+                        jsonbj.put("is_w_photo", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", imgWallet.getContentDescription().toString());
-                    item_map.put("image_name", "image" + i);
+                    item_map.put("image_name", "w_photo[]");
+                    item_map.put("tag", imgWallet.getTag().toString());
+
                     this.list_images.add(item_map);
                 }
                 this.walletJsonArray.put(jsonbj);
@@ -512,11 +539,21 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                 ImageView img_Account = (ImageView) view.findViewById(R.id.img_Account);
                 if (img_Account.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("ac_photo", "");
+                    jsonbj.put("is_file", 0);
                 } else {
-                    jsonbj.put("ac_photo", "ac_photo" + i);
+                    String[] arr = img_Account.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    jsonbj.put("ac_photo", atr);
+                    if (img_Account.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_Account.getContentDescription().toString());
-                    item_map.put("image_name", "ac_photo" + i);
+                    item_map.put("image_name", "ac_photo[]");
+                    item_map.put("tag", img_Account.getTag().toString());
+
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("account_id", edit_account_id.getText().toString().trim());
@@ -607,6 +644,15 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                     }
                 });
                 UrlImageViewHelper.setUrlDrawable(imgWallet, json.getString("w_photo").toString().trim(), (int) R.drawable.img);
+                if (json.getString("w_photo") != null && !json.getString("w_photo").equalsIgnoreCase("")) {
+                    imgWallet.setContentDescription(json.getString("w_photo"));
+                    imgWallet.setTag("1");
+//                    HashMap<String, String> item_map = new HashMap<>();
+//                    item_map.put("image_path", json.getString("w_photo").toString());
+//                    item_map.put("image_name", "w_photo[]");
+//                    item_map.put("uri", "1");
+//                    this.list_images.add(item_map);
+                }
                 if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                     edit_Card.setEnabled(false);
                     edit_Number.setEnabled(false);
@@ -721,17 +767,26 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                 JSONObject json = accountDetail.getJSONObject(i);
                 final View accountView = LayoutInflater.from(this).inflate(R.layout.layout_account, null);
                 final ImageView removerAccountIcon = (ImageView) accountView.findViewById(R.id.removerAccountIcon);
-                final ImageView img_Account = (ImageView) accountView.findViewById(R.id.img_Account);
-                img_Account.setOnClickListener(new OnClickListener() {
+                final ImageView img_Account1 = (ImageView) accountView.findViewById(R.id.img_Account);
+                img_Account1.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
-                        AccountMenu.this.currentImageVew = img_Account;
+                        AccountMenu.this.currentImageVew = img_Account1;
                         Intent intent = new Intent();
                         intent.setType("image/*");
                         intent.setAction("android.intent.action.GET_CONTENT");
                         AccountMenu.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
                     }
                 });
-                UrlImageViewHelper.setUrlDrawable(img_Account, json.getString("ac_photo").toString().trim(), (int) R.drawable.img);
+                UrlImageViewHelper.setUrlDrawable(img_Account1, json.getString("ac_photo").toString().trim(), (int) R.drawable.img);
+                if (json.getString("ac_photo") != null && !json.getString("ac_photo").equalsIgnoreCase("")) {
+                    img_Account1.setTag("1");
+                    img_Account1.setContentDescription(json.getString("ac_photo"));
+//                    HashMap<String, String> item_map = new HashMap<>();
+//                    item_map.put("image_path", json.getString("ac_photo").toString());
+//                    item_map.put("image_name", "ac_photo[]");
+//                    item_map.put("uri", "1");
+//                    this.list_images.add(item_map);
+                }
                 removerAccountIcon.setTag(json.getString("account_id").toString().trim());
                 removerAccountIcon.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
@@ -751,10 +806,21 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                 EditText edit_accLocation = (EditText) accountView.findViewById(R.id.edit_accLocation);
                 edit_accLocation.setText(json.getString("ac_location").toString().trim());
                 ToggleButton yesNoAccount = (ToggleButton) accountView.findViewById(R.id.yesNoAccount);
+                yesNoAccount.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            img_Account1.setVisibility(View.VISIBLE);
+                        } else {
+                            img_Account1.setVisibility(View.GONE);
+                        }
+                    }
+                });
                 if (json.getString("ac_is_photo").toString().trim().equalsIgnoreCase("1")) {
                     yesNoAccount.setChecked(true);
+                    img_Account1.setVisibility(View.VISIBLE);
                 } else {
                     yesNoAccount.setChecked(false);
+                    img_Account1.setVisibility(View.GONE);
                 }
                 if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                     edit_accType.setEnabled(false);
@@ -762,7 +828,7 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
                     edit_accLocation.setEnabled(false);
                     yesNoAccount.setEnabled(false);
                     removerAccountIcon.setVisibility(View.GONE);
-                    img_Account.setEnabled(false);
+                    img_Account1.setEnabled(false);
                 }
                 this.accountLayout.addView(accountView);
             }
@@ -779,17 +845,18 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -798,16 +865,19 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -817,7 +887,6 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -831,15 +900,18 @@ public class AccountMenu extends Activity implements OnClickListener, ResponseLi
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

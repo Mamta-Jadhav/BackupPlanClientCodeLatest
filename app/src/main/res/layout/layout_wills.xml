@@ -1,53 +1,337 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:background="@drawable/bg" android:layout_width="match_parent" android:layout_height="match_parent" android:animateLayoutChanges="true">
-    <include layout="@layout/actionbar_form"/>
-    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
-        <LinearLayout android:orientation="vertical" android:paddingBottom="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-            <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_wills_id" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true"/>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_HaveWill" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoHaveWill" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/bg"
+    android:orientation="vertical">
+
+    <include layout="@layout/actionbar_form" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:paddingBottom="10dp">
+
+            <EditText
+                android:id="@+id/edit_wills_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:padding="5dp"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_HaveWill"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoHaveWill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_haveTrust" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNohaveTrust" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_haveTrust"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNohaveTrust"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_UpDate" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoUpDate" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_UpDate"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoUpDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_HaveLiving" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoHaveLiving" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_HaveLiving"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoHaveLiving"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_PowerAttorney" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoPowerAttorney" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_PowerAttorney"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoPowerAttorney"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_HaveHealth" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoHaveHealth" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_HaveHealth"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoHaveHealth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:id="@+id/url1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/download_tip"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/url1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/download_tip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
             </LinearLayout>
-            <LinearLayout android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content">
-                <LinearLayout android:gravity="center" android:orientation="vertical" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content">
-                    <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" android:textColor="@android:color/black" android:layout_gravity="left" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/txt_DirectivesDeceased"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:text="@string/txt_DirectivesDeceased"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textColor="@android:color/black"
+                        android:textStyle="bold" />
                 </LinearLayout>
-                <LinearLayout android:orientation="vertical" android:id="@+id/layoutWishes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:layout_marginBottom="5dp"/>
+
+                <LinearLayout
+                    android:id="@+id/layoutWishes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="vertical" />
             </LinearLayout>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_wishes_id" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="" android:singleLine="true"/>
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:layout_gravity="center_vertical" android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/Q_Wish" android:layout_weight="1"/>
-                <ToggleButton android:id="@+id/yesNoService" android:background="@drawable/toggle_selector" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="false" android:textOn="@null" android:textOff="@null"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:visibility="visible">
+
+                <EditText
+                    android:id="@+id/edit_wishes_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:padding="5dp"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/Q_Wish"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
+
+                <ToggleButton
+                    android:id="@+id/yesNoService"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/toggle_selector"
+                    android:checked="false"
+                    android:textOff="@null"
+                    android:textOn="@null" />
             </LinearLayout>
-            <HorizontalScrollView android:id="@+id/sv" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp" android:layout_marginTop="5dp" android:layout_marginBottom="5dp">
-                <LinearLayout android:orientation="horizontal" android:id="@+id/layout_images" android:layout_width="wrap_content" android:layout_height="wrap_content" android:animateLayoutChanges="true"/>
+
+            <HorizontalScrollView
+                android:id="@+id/sv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp">
+
+                <LinearLayout
+                    android:id="@+id/layout_images"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:orientation="horizontal" />
             </HorizontalScrollView>
-            <EditText android:layout_gravity="center_vertical" android:id="@+id/editLocation" android:background="@drawable/bg_input" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp" android:hint="@string/hint_Location" android:singleLine="true"/>
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp">
-                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:textColor="@android:color/black" android:autoLink="web" android:layout_gravity="center_vertical" android:id="@+id/url2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="5dp" android:text="@string/url_wills2"/>
+
+            <EditText
+                android:id="@+id/editLocation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:hint="@string/hint_Location"
+                android:padding="5dp"
+                android:singleLine="true" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/bg_input"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/url2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="5dp"
+                    android:autoLink="web"
+                    android:text="@string/url_wills2"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/black" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

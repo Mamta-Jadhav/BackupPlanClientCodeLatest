@@ -1,15 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:id="@+id/layout_parent" android:layout_width="match_parent" android:layout_height="wrap_content">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
-        <ImageView android:layout_gravity="right" android:id="@+id/removeSiblingIcon" android:tag="" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_close1"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/removeSiblingIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:src="@drawable/ic_close1"
+            android:tag=""
+            android:visibility="gone" />
     </LinearLayout>
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-            <EditText android:id="@+id/edit_sibling_id" android:background="@drawable/bg_input" android:padding="10dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_brother" android:singleLine="true"/>
-            <EditText android:id="@+id/editViewBrother" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_brother" android:singleLine="true"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/edit_sibling_id"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/button_material_light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_input"
+                android:hint="@string/hint_brother"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/editViewBrother"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/button_material_light"
+                android:background="@drawable/bg_input"
+                android:hint="@string/hint_brother"
+                android:padding="10dp"
+                android:singleLine="true" />
         </LinearLayout>
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
-            <EditText android:id="@+id/editViewSister" android:background="@drawable/bg_input" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_sister" android:singleLine="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/editViewSister"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_input"
+                android:hint="@string/hint_sister"
+                android:padding="10dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/button_material_light"
+                android:singleLine="true" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

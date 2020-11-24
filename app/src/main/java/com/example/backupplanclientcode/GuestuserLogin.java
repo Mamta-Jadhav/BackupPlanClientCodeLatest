@@ -89,8 +89,9 @@ public class GuestuserLogin extends FragmentActivity implements OnClickListener,
                             nameValuePairs.put("notification_flag", "0");
                         }
                         nameValuePairs.put("token", YourBackupPlanApp.GetDeviceID(getApplicationContext()));
-                        nameValuePairs.put("register_id", this.pref.getStringValue("gcm_registration_id", ""));
+                        nameValuePairs.put("register_id", "2");//this.pref.getStringValue("gcm_registration_id", ""));
                         nameValuePairs.put("device_type", "1");
+                        nameValuePairs.put("device", "android");
                         nameValuePairs.put("is_guest", "1");
                         this.mNameValuePairs = null;
                         this.mNameValuePairs = nameValuePairs;
@@ -119,7 +120,8 @@ public class GuestuserLogin extends FragmentActivity implements OnClickListener,
             if (responseCode == 1) {
                 if (response.getString("success").equalsIgnoreCase("1")) {
                     displayToast(response.getString("message"));
-                    openLoginVerification();
+//                    openLoginVerification();
+                    saveUserInfo(response);
                     return;
                 }
                 displayToast(response.getString("message"));
@@ -156,7 +158,7 @@ public class GuestuserLogin extends FragmentActivity implements OnClickListener,
         JSONObject login_detail = response.getJSONObject("login_detail");
         this.pref.setStringValue(Constant.user_name, login_detail.getString("username").trim());
         this.pref.setStringValue(Constant.user_email, login_detail.getString("email").trim());
-        this.pref.setStringValue(Constant.user_id, login_detail.getString("owner_id").trim());
+        this.pref.setStringValue(Constant.user_id, login_detail.getString("user_id").trim());
         this.pref.setStringValue(Constant.WillsAndWishesFalg, login_detail.getString("wills_id"));
         this.pref.setStringValue(Constant.profile_id, login_detail.getString("profile_id"));
         this.pref.setStringValue(Constant.long_term_id, login_detail.getString("long_term_id"));

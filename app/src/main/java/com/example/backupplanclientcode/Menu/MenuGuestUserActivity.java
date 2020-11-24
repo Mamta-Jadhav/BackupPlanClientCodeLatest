@@ -48,12 +48,12 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
     TextView actionBarTittle;
     ImageView addIcon;
     Button btn_back;
-    Button btn_changePassword;
+    //    Button btn_changePassword;
     Button btn_save;
     private ConnectionDetector connection;
     DBHelper dbHelper;
-    EditText editConfirmPassword;
-    EditText editPassword;
+    //    EditText editConfirmPassword;
+//    EditText editPassword;
     LinearLayout guestuserListView;
     SettingPreference pref;
 
@@ -72,40 +72,16 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         this.addIcon = (ImageView) findViewById(R.id.addIcon);
         this.btn_save = (Button) findViewById(R.id.btn_save);
         this.btn_back = (Button) findViewById(R.id.btn_back);
-        this.btn_changePassword = (Button) findViewById(R.id.btn_changePassword);
-        this.btn_changePassword.setOnClickListener(this);
+//        this.btn_changePassword = (Button) findViewById(R.id.btn_changePassword);
+//        this.btn_changePassword.setOnClickListener(this);
         this.actionBarTittle = (TextView) findViewById(R.id.actionBarTittle);
         this.guestuserListView = (LinearLayout) findViewById(R.id.guestuserListView);
         this.btn_back.setOnClickListener(this);
         this.addIcon.setOnClickListener(this);
         this.actionBarTittle.setText(getResources().getString(R.string.menu_guest_user));
         this.btn_save.setVisibility(View.GONE);
-        this.editPassword = (EditText) findViewById(R.id.editPassword);
-        this.editConfirmPassword = (EditText) findViewById(R.id.editConfirmPassword);
-    }
-
-    /* access modifiers changed from: protected */
-    public void onResume() {
-        super.onResume();
-
-        Log.e("TAG", "onResume()");
-
-        if(logout.equals("true")){
-
-            logout = "false";
-
-            //redirect user to login screen
-            pref.setBooleanValue(Constant.isLogin, false);
-            pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
-        }
-
-        if (this.connection.isConnectingToInternet()) {
-            getGuestUsers();
-        } else {
-            Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
-        }
+//        this.editPassword = (EditText) findViewById(R.id.editPassword);
+//        this.editConfirmPassword = (EditText) findViewById(R.id.editConfirmPassword);
     }
 
     /* access modifiers changed from: private */
@@ -136,9 +112,9 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
             case R.id.btn_back /*2131558590*/:
                 finish();
                 return;
-            case R.id.btn_changePassword /*2131558953*/:
-                changePassword();
-                return;
+//            case R.id.btn_changePassword /*2131558953*/:
+//                changePassword();
+//                return;
             case R.id.addIcon /*2131558955*/:
                 startActivity(new Intent(getApplicationContext(), MenuAddNewUser.class));
                 return;
@@ -147,38 +123,42 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         }
     }
 
-    private void changePassword() {
-        if (this.editPassword.getText().toString().trim().isEmpty()) {
-            this.editPassword.setError("field is Required");
-        } else if (this.editConfirmPassword.getText().toString().trim().isEmpty()) {
-            this.editConfirmPassword.setError("field is Required");
-        } else if (this.editPassword.getText().toString().trim().equals(this.editConfirmPassword.getText().toString().trim())) {
-            try {
-                JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-                nameValuePair.put("new_password", this.editPassword.getText().toString().trim());
-                new GeneralTask(this, ServiceUrl.change_password, nameValuePair, 1, "post").execute(new Void[0]);
-            } catch (Exception e) {
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), "Password does not match", Toast.LENGTH_LONG).show();
-        }
-    }
+//    private void changePassword() {
+//        if (this.editPassword.getText().toString().trim().isEmpty()) {
+//            this.editPassword.setError("field is Required");
+//        } else if (this.editConfirmPassword.getText().toString().trim().isEmpty()) {
+//            this.editConfirmPassword.setError("field is Required");
+//        } else if (this.editPassword.getText().toString().trim().equals(this.editConfirmPassword.getText().toString().trim())) {
+//            try {
+//                JSONObject nameValuePair = new JSONObject();
+//                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+//                nameValuePair.put("new_password", this.editPassword.getText().toString().trim());
+//
+//                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+//                new GeneralTask(this, ServiceUrl.change_password, nameValuePair, 1, "post").execute(new Void[0]);
+//            } catch (Exception e) {
+//            }
+//        } else {
+//            Toast.makeText(getApplicationContext(), "Password does not match", Toast.LENGTH_LONG).show();
+//        }
+//    }
 
     public void on_GeneralSuccess(JSONObject response, int responseCode) {
         try {
             if (responseCode == 1) {
-                try {
-                    Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
-                    this.editPassword.setText("");
-                    this.editConfirmPassword.setText("");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+//                    this.editPassword.setText("");
+//                    this.editConfirmPassword.setText("");
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
             } else if (responseCode == 100) {
                 if (response.has("user")) {
                     setGuestUser(response.getJSONObject("user").getJSONArray("user"));
                 } else {
+                    this.guestuserListView.removeAllViews();
+                    pref.setStringValue(Constant.guestCount, "0");
                     Toast.makeText(getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
                 }
             } else if (responseCode == 200) {
@@ -193,7 +173,7 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         String userId = this.pref.getStringValue(Constant.user_id, "");
         try {
             JSONObject nameValuePairs = new JSONObject();
-            nameValuePairs.put("user_id", "2");// userId);
+            nameValuePairs.put("user_id", userId);
             nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
             new GeneralTask(this, ServiceUrl.get_guest_users, nameValuePairs, 100, "post").execute(new Void[0]);
         } catch (Exception e) {
@@ -213,10 +193,12 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
             ImageView editUser = (ImageView) view.findViewById(R.id.editUser);
             ((ImageView) view.findViewById(R.id.deleteuser)).setVisibility(View.GONE);
             editUser.setVisibility(View.GONE);
+            pref.setStringValue(Constant.guestCount, "0");
             this.guestuserListView.addView(view);
             return;
         }
         for (int i = 0; i < guestUsers.length(); i++) {
+            pref.setStringValue(Constant.guestCount, i+1 + "");
             JSONObject guestJson = guestUsers.getJSONObject(i);
             final String userName = guestJson.getString("username");
             final String guesyUserId = guestJson.getString("user_id");
@@ -254,6 +236,7 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
             JSONObject nameValuePairs = new JSONObject();
             nameValuePairs.put("user_id", userId);
             nameValuePairs.put("guest_id", guestUserId);
+            nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
             new GeneralTask(this, ServiceUrl.delete_guest_user, nameValuePairs, 200, "post").execute(new Void[0]);
         } catch (Exception e) {
         }
@@ -262,17 +245,18 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -281,16 +265,19 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -301,10 +288,36 @@ public class MenuGuestUserActivity extends Activity implements OnClickListener, 
         Log.e("TAG", "User interacting with screen");
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
         Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (this.connection.isConnectingToInternet()) {
+            getGuestUsers();
+        } else {
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
+        }
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
     }
 }

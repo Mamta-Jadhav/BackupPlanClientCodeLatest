@@ -8,6 +8,7 @@ public class Constant {
     public static String PrefName = "LiveWallet";
     public static String RetirementFlag = "RetirementFlag";
     public static String WillsAndWishesFalg = "WillsAndWishesFalg";
+    public static String WillsId= "WillsId";
     public static String accountFlag = "accountFlag";
     public static String assetFlag = "assetFlag";
     public static String billToPay = "billToPay";
@@ -20,6 +21,7 @@ public class Constant {
     public static String internet_id = "internet_id";
     public static String investmentFlag = "investmentFlag";
     public static String isGuestLogin = "isGuestLogin";
+    public static String guestCount = "guestCount";
     public static String isLogin = "isLogin";
     public static String isNotification = "isNotification";
     public static String long_term_id = "long_term_id";

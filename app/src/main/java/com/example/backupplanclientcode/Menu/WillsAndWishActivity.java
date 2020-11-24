@@ -31,17 +31,21 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +60,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WillsAndWishActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class WillsAndWishActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     Button btn_back;
@@ -138,26 +145,27 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
     }
 
     private void checkAlredySaveAccount() {
-//        if (this.pref.getStringValue(Constant.WillsAndWishesFalg, "").equalsIgnoreCase("1")) {
-//            this.btn_save.setText("Edit");
-//            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-//                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_will_wishes));
-//            }
-//            if (this.connection.isConnectingToInternet()) {
-//                try {
-//                    JSONObject nameValuePair = new JSONObject();
-//                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-//                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//                    new GeneralTask(this, ServiceUrl.get_wills_detail, nameValuePair, 2, "post").execute(new Void[0]);
-//                } catch (Exception e) {
-//                }
-//            } else {
-//                displayMessage(getResources().getString(R.string.connectionFailMessage));
-//            }
-//        } else {
-        this.actionBarTittle.setText(getResources().getString(R.string.menu_will_wishes));
-        addMoreImages();
-//        }
+        if (!this.pref.getStringValue(Constant.WillsId, "").equalsIgnoreCase("") && !this.pref.getStringValue(Constant.WillsId, "").equalsIgnoreCase("0")) {
+            this.btn_save.setText("Edit");
+            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_will_wishes));
+            }
+            if (this.connection.isConnectingToInternet()) {
+                try {
+                    JSONObject nameValuePair = new JSONObject();
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("wills_id", this.pref.getStringValue(Constant.WillsId, ""));
+                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                    new GeneralTask(this, ServiceUrl.get_wills_detail, nameValuePair, 2, "post").execute(new Void[0]);
+                } catch (Exception e) {
+                }
+            } else {
+                displayMessage(getResources().getString(R.string.connectionFailMessage));
+            }
+        } else {
+            this.actionBarTittle.setText(getResources().getString(R.string.menu_will_wishes));
+            addMoreImages();
+        }
         if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             setEnableControl();
         }
@@ -218,10 +226,22 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+//            this.currentImageVew.setTag("0");
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
 
+            if (resultCode == -1 && requestCode == 2) {
+                Uri selectedImageUri2 = data.getData();
+                String[] filePathColumn2 = {"_data"};
+                Cursor cursor2 = getContentResolver().query(selectedImageUri2, filePathColumn2, null, null, null);
+                cursor2.moveToFirst();
+                String picturePath2 = cursor2.getString(cursor2.getColumnIndex(filePathColumn2[0]));
+                cursor2.close();
+                this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri2.toString(), picturePath2));
+                this.currentImageVew.setContentDescription(picturePath2.toString());
+                addMoreImages();
+            }
         }
     }
 
@@ -243,7 +263,7 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
     private void addMoreImages() {
         final View moreImagesLayout = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
         final ImageView iv = (ImageView) moreImagesLayout.findViewById(R.id.iv);
-        iv.setTag("image");
+//        iv.setTag("image");
         iv.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 WillsAndWishActivity.this.currentImageVew = iv;
@@ -264,17 +284,17 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
         if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             btn_remove.setVisibility(View.GONE);
             iv.setEnabled(false);
-        } else {
-            for (int i = 0; i < this.layout_images.getChildCount(); i++) {
-                ViewGroup child = (ViewGroup) this.layout_images.getChildAt(i);
-                Button removeBTN = (Button) child.findViewById(R.id.btn_remove);
-                if (!((ImageView) child.findViewById(R.id.iv)).getContentDescription().toString().trim().isEmpty() || !removeBTN.getTag().toString().isEmpty()) {
-                    removeBTN.setVisibility(View.VISIBLE);
-                } else {
-                    removeBTN.setVisibility(View.GONE);
-                }
+        }
+        for (int i = 0; i < this.layout_images.getChildCount(); i++) {
+            ViewGroup child = (ViewGroup) this.layout_images.getChildAt(i);
+            Button removeBTN = (Button) child.findViewById(R.id.btn_remove);
+            if (!((ImageView) child.findViewById(R.id.iv)).getContentDescription().toString().trim().isEmpty() || !removeBTN.getTag().toString().isEmpty()) {
+                removeBTN.setVisibility(View.VISIBLE);
+            } else {
+                removeBTN.setVisibility(View.GONE);
             }
         }
+
         this.layout_images.addView(moreImagesLayout);
     }
 
@@ -344,27 +364,49 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             }
             for (int i = 0; i < this.layout_images.getChildCount(); i++) {
                 ImageView iv = (ImageView) ((ViewGroup) this.layout_images.getChildAt(i)).findViewById(R.id.iv);
-                if (!iv.getContentDescription().toString().equalsIgnoreCase("")) {
+
+                if (!iv.getContentDescription().toString().isEmpty()) {
+                    String[] arr = iv.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "image" + i);
+                    item_map.put("image_name", "wishes_images[]");
+                    this.list_images.add(item_map);
+
+                    if (this.collectImages.equalsIgnoreCase("")) {
+                        this.collectImages = this.collectImages.concat(atr);
+                    } else {
+                        this.collectImages = this.collectImages.concat("," + atr);
+                    }
+
+
+/*
+                if (!iv.getContentDescription().toString().equalsIgnoreCase("")) {
+                    String[] arr = iv.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    HashMap<String, String> item_map = new HashMap<>();
+                    item_map.put("image_path", iv.getContentDescription().toString());
+                    item_map.put("image_name", atr);
                     this.list_images.add(item_map);
                     Log.i("images :", this.list_images.toString());
                     if (this.collectImages.equalsIgnoreCase("")) {
-                        this.collectImages = this.collectImages.concat(iv.getContentDescription().toString());
+                        this.collectImages = this.collectImages.concat(atr);
                     } else {
-                        this.collectImages = this.collectImages.concat(",image" + i);
+                        this.collectImages = this.collectImages.concat("," + atr);
                     }
-                }
-                if (!iv.getTag().toString().trim().equalsIgnoreCase("")) {
-                    if (this.delete_images.equalsIgnoreCase("")) {
-                        this.delete_images = this.delete_images.concat(iv.getTag().toString());
-                    } else {
-                        this.delete_images = this.delete_images.concat("," + iv.getTag().toString());
+                }*/
+
+
+                    if (!iv.getTag().toString().trim().equalsIgnoreCase("")) {
+                        if (this.delete_images.equalsIgnoreCase("")) {
+                            this.delete_images = this.delete_images.concat(iv.getTag().toString());
+                        } else {
+                            this.delete_images = this.delete_images.concat("," + iv.getTag().toString());
+                        }
                     }
                 }
             }
-            willsJson.put("wishes_images", "a.jpg");//this.collectImages);
+            willsJson.put("wishes_images", this.collectImages);
             willsJson.put("w_location", this.editLocation.getText().toString().trim());
             willsJson.put("delete_images", this.delete_images);
             MultipartEntity entity = new MultipartEntity();
@@ -372,17 +414,15 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
             sendJson.put("wills_data", willsJson);
             entity.addPart("json_data", new StringBody(sendJson.toString()));
             for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-//                entity.addPart((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))));
+//                if (this.list_images.get(i2).get("tag").toString().equalsIgnoreCase("1")) {
+//                } else {
                 entity.addPart("wishes_images[]", new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))));
                 Log.e("send image path :", (String) ((HashMap) this.list_images.get(i2)).get("image_path"));
+//                }
             }
             Log.e("send wills json :", sendJson.toString());
             Log.i("images :", this.list_images.toString());
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
-            for (int i2 = 0; i2 < this.list_images.size(); i2++) {
-                nameValuePairs.add((new BasicNameValuePair((String) ((HashMap) this.list_images.get(i2)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i2)).get("image_path"))).getFilename())));
-            }
+
             if (!this.connection.isConnectingToInternet()) {
                 displayMessage(getResources().getString(R.string.connectionFailMessage));
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
@@ -406,9 +446,14 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
     @SuppressLint({"InflateParams"})
     private void show_wills(JSONObject response) {
         try {
-//            JSONObject json1 = response.getJSONObject("wills");
-            JSONArray jsona = response.getJSONArray("wills");
-            JSONObject json = jsona.getJSONObject(0);
+
+            JSONObject outerJsonObject = response.getJSONObject("wills");
+            JSONArray innerJsonObject = outerJsonObject.getJSONArray("wills");
+
+            // JSONObject json1 = response.getJSONObject("wills");
+            //  JSONArray jsona = response.getJSONArray("wills");
+            //  JSONObject json = jsona.getJSONObject(0);
+            JSONObject json = innerJsonObject.getJSONObject(0);
             if (response.has("wills")) {
                 if (json.getString("is_wills").equalsIgnoreCase("1")) {
                     this.yesNoHaveWill.setChecked(true);
@@ -447,13 +492,17 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
                 }
                 this.edit_wills_id.setText(json.getString("wills_id").toString().trim());
                 this.editLocation.setText(json.getString("w_location").toString().trim());
-                JSONArray wishes_images = json.getJSONArray("wishes_images");
+
+                JSONArray wishes_images = response.getJSONArray("wishes_images");
+
                 for (int i = 0; i < wishes_images.length(); i++) {
                     JSONObject imageDetail = wishes_images.getJSONObject(i);
                     final View moreImagesLayout = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
                     final ImageView iv = (ImageView) moreImagesLayout.findViewById(R.id.iv);
                     iv.setTag(imageDetail.getString("image_id").toString().trim());
                     UrlImageViewHelper.setUrlDrawable(iv, imageDetail.getString("image").toString().trim(), (int) R.drawable.img);
+//                    iv.setContentDescription(imageDetail.getString("image").toString().trim());
+//                    iv.setTag("1");
                     iv.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
                             WillsAndWishActivity.this.currentImageVew = iv;
@@ -495,7 +544,9 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
                 displayMessage(response.getString("message").toString());
             }
             if (response.has("success") && response.getString("success").toString().trim().equalsIgnoreCase("1")) {
-                this.pref.setStringValue(Constant.WillsAndWishesFalg, response.getString("success").toString());
+                if (response.has("wills_id")) {
+                    this.pref.setStringValue(Constant.WillsId, response.getString("wills_id").toString());
+                }
                 finish();
             }
         } catch (JSONException e) {
@@ -505,5 +556,78 @@ public class WillsAndWishActivity extends Activity implements OnClickListener, R
 
     private void displayMessage(String string) {
         Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
     }
 }

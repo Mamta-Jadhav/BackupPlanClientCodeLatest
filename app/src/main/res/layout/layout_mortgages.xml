@@ -1,18 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp">
-        <ImageView android:layout_gravity="right" android:id="@+id/removeIcon" android:paddingBottom="5dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="5dp" android:src="@drawable/ic_close1"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_MortgagesId" android:padding="5dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Name" android:background="@drawable/bg_input_top" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_PartnerName" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Address" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_AddressofProperty" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Register1" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_RegisteredOwner" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Register2" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_RegisteredOwner" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Register3" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_RegisteredOwner" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_DateOfPurchase" android:background="@drawable/bg_input_center" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_DateOfPurchasePrice" android:singleLine="true"/>
-        <EditText android:textAppearance="?android:attr/textAppearanceMedium" android:layout_gravity="center_vertical" android:id="@+id/edit_Price" android:background="@drawable/bg_input_bottom" android:padding="5dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/hint_Price" android:singleLine="true"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/removeIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_marginRight="5dp"
+            android:paddingBottom="5dp"
+            android:src="@drawable/ic_close1" />
+
+        <EditText
+            android:id="@+id/edit_MortgagesId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/edit_Name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_top"
+            android:hint="@string/hint_PartnerName"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_Address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_center"
+            android:hint="@string/hint_AddressofProperty"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_Register1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_center"
+            android:hint="@string/hint_RegisteredOwner"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_Register2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_center"
+            android:hint="@string/hint_RegisteredOwner"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_Register3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_center"
+            android:hint="@string/hint_RegisteredOwner"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_DateOfPurchase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_center"
+            android:hint="@string/hint_DateOfPurchasePrice"
+            android:padding="5dp"
+            android:inputType="date"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/edit_Price"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_input_bottom"
+            android:hint="@string/hint_Price"
+            android:padding="5dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp">
-        <TextView android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="normal" android:textColor="@android:color/black" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="5dp" android:text="@string/txt_photo_Mortgage"/>
-        <ImageView android:id="@+id/img_mortgages" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/img" android:contentDescription=""/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="@string/txt_photo_Mortgage"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/black"
+            android:textStyle="normal" />
+
+        <ImageView
+            android:id="@+id/img_mortgages"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription=""
+            android:src="@drawable/img" />
     </LinearLayout>
 </LinearLayout>

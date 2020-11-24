@@ -100,11 +100,25 @@ public class RegisterActivity extends Activity implements OnClickListener, Gener
 
     public void on_GeneralSuccess(JSONObject response, int responseCode) {
         try {
-            if (response.getString("success").equalsIgnoreCase("1")) {
-                displayToast(response.getString("message"));
-                this.pref.setStringValue(Constant.user_name, response.getString("message"));
-                finish();
-                return;
+            Log.d("test", response.toString());
+            if (response.has("success")) {
+                if (response.getString("success").equalsIgnoreCase("1")) {
+                    displayToast(response.getString("message"));
+                    this.pref.setStringValue(Constant.user_name, response.getString("message"));
+                    finish();
+                    return;
+                }
+            } else {
+                if (response.has("errors")) {
+                    if (response.getJSONObject("errors").has("username")) {
+                        displayToast(response.getJSONObject("errors").getJSONArray("username").get(0) + "");
+                        return;
+                    }
+                    if (response.getJSONObject("errors").has("password")) {
+                        displayToast(response.getJSONObject("errors").getJSONArray("password").get(0) + "");
+                        return;
+                    }
+                }
             }
             displayToast(response.getString("message"));
         } catch (Exception e) {

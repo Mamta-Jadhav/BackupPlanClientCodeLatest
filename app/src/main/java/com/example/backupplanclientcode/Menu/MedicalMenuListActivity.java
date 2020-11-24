@@ -31,16 +31,21 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +58,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MedicalMenuListActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MedicalMenuListActivity extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     ImageView addAppointmentIcon;
@@ -113,28 +121,28 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
     }
 
     private void checkAlreadySaveinvestment() {
-//        if (this.pref.getStringValue(Constant.medical_id, "").equalsIgnoreCase("0") ||this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
-        this.actionBarTittle.setText(getResources().getString(R.string.menu_medical));
-        addAppointmentlayout();
-        return;
-//        }
-//        this.btn_save.setText("Edit");
-//        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-//            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
-//        }
-//        if (this.connection.isConnectingToInternet()) {
-//           try {
-//               JSONObject nameValuePair = new JSONObject();
-//               nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-//               nameValuePair.put("medical_id",this.pref.getStringValue(Constant.medical_id, "1"));
-//               nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//               new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
-//           }catch(Exception e){
-//
-//           }
-//            return;
-//        }
-//        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
+        if (this.pref.getStringValue(Constant.medical_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.medical_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+            this.actionBarTittle.setText(getResources().getString(R.string.menu_medical));
+            addAppointmentlayout();
+            return;
+        }
+        this.btn_save.setText("Edit");
+        if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+            this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_medical));
+        }
+        if (this.connection.isConnectingToInternet()) {
+            try {
+                JSONObject nameValuePair = new JSONObject();
+                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("medical_id", this.pref.getStringValue(Constant.medical_id, "1"));
+                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                new GeneralTask(this, ServiceUrl.get_medical_detail, nameValuePair, 1, "post").execute(new Void[0]);
+            } catch (Exception e) {
+
+            }
+            return;
+        }
+        Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
     }
 
     public void onClick(View v) {
@@ -163,7 +171,7 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             appointJson.put("m_doctor", this.edit_doctor.getText().toString().trim());
             appointJson.put("m_location", this.edit_Location.getText().toString().trim());
             appointJson.put("m_medical_card", this.edit_MedicalCard.getText().toString().trim());
-            appointJson.put("medical_id", "1");//this.edit_medical_id.getText().toString().trim());
+            appointJson.put("medical_id", this.edit_medical_id.getText().toString().trim());
             for (int i = 0; i < this.layout_appointment.getChildCount(); i++) {
                 ViewGroup view = (ViewGroup) this.layout_appointment.getChildAt(i);
                 JSONObject json = new JSONObject();
@@ -176,7 +184,7 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
                 EditText edit_Surgery = (EditText) view.findViewById(R.id.edit_Surgery);
                 EditText edit_Prescription = (EditText) view.findViewById(R.id.edit_Prescription);
                 ImageView img_Appointment = (ImageView) view.findViewById(R.id.img_Appointment);
-                json.put("appointment_id", "7");//((EditText) view.findViewById(R.id.edit_id)).getText().toString().trim());
+                json.put("appointment_id", ((EditText) view.findViewById(R.id.edit_id)).getText().toString().trim());
                 json.put("a_date", edit_Date.getText().toString().trim());
                 json.put("a_doctor", edit_Physician.getText().toString().trim());
                 json.put("a_complaint", edit_complaint.getText().toString().trim());
@@ -186,21 +194,25 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
                 json.put("a_results", edit_Results.getText().toString().trim());
                 json.put("a_prescription", edit_Prescription.getText().toString().trim());
                 if (!img_Appointment.getContentDescription().toString().trim().isEmpty()) {
-                    json.put("a_photo", selectedImage);
-//                    File file = new File(img_Appointment.getContentDescription().toString());
-//                    multipartEntity.addPart("a_photo" + i, new FileBody(file));
+                    String[] arr = img_Appointment.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json.put("a_photo", atr);
+                    if (img_Appointment.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(img_Appointment.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        multipartEntity.addPart("a_photo[]", new FileBody(new File(destFolder + "/" + atr)));
 
-//                    Bitmap immagex=selectedImage;
-//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                    immagex.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-//                    byte[] b = baos.toByteArray();
-//                    String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-//
-//                    Log.e("LOOK", imageEncoded);
-                    multipartEntity.addPart("a_photo", new StringBody(selectedImage));
+                        json.put("is_file", 0);
+                    } else {
+                        multipartEntity.addPart("a_photo[]", new FileBody(new File(img_Appointment.getContentDescription().toString())));
+                        json.put("is_file", 1);
+                    }
                     Log.i("img_Appointment", img_Appointment.getContentDescription().toString());
                 } else {
                     json.put("a_photo", "");
+                    json.put("is_file", 0);
                 }
                 jsonArray.put(json);
             }
@@ -213,45 +225,31 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             if (!this.connection.isConnectingToInternet()) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
-                /*multipartEntity.addPart("json_data", new StringBody(appoint_data.toString()));
-                multipartEntity.addPart("a_photo", new StringBody(photo_array.toString()));
-//                multipartEntity.addPart("token", new StringBody(this.pref.getStringValue(Constant.jwttoken, "")));
+                multipartEntity.addPart("json_data", new StringBody(appoint_data.toString()));
                 SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.edit_medical, multipartEntity);
-                saveProfileAsytask.execute(new Void[0]);*/
-                JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("json_data", appoint_data);
-                nameValuePair.put("a_photo", photo_array);
-                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-                new GeneralTask(this, ServiceUrl.edit_medical, nameValuePair, 1, "post").execute(new Void[0]);
+                saveProfileAsytask.execute(new Void[0]);
             } else {
-              /*  multipartEntity.addPart("json_data", new StringBody(appoint_data.toString()));
-                multipartEntity.addPart("a_photo", new StringBody(photo_array.toString()));
-//                multipartEntity.addPart("token", new StringBody(this.pref.getStringValue(Constant.jwttoken, "")));
+                multipartEntity.addPart("json_data", new StringBody(appoint_data.toString()));
                 SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.save_medical, multipartEntity);
-                saveProfileAsytask2.execute(new Void[0]);*/
-                JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("json_data", appoint_data);
-                nameValuePair.put("a_photo[]", photo_array);
-                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-                new GeneralTask(this, ServiceUrl.save_medical, nameValuePair, 1, "post").execute(new Void[0]);
+                saveProfileAsytask2.execute(new Void[0]);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private String getRealPathFromURI(Uri contentURI) {
-        String filePath;
-        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) {
-            filePath = contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            filePath = cursor.getString(idx);
-            cursor.close();
-        }
-        return filePath;
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     @SuppressLint({"InflateParams"})
@@ -339,14 +337,25 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             this.selectedImage = cursor.getString(nameIndex);
             this.currentImageVew.setImageBitmap(selectedImage);
             this.currentImageVew.setContentDescription(imageUri.getPath());
-            /* Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"dat"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.currentImageVew.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
-            this.currentImageVew.setContentDescription(picturePath.toString());*/
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
+
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+
         }
     }
 
@@ -445,6 +454,8 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
                 ImageView img_Appointment = (ImageView) view.findViewById(R.id.img_Appointment);
                 if (json.has("a_photo")) {
                     UrlImageViewHelper.setUrlDrawable(img_Appointment, json.getString("a_photo").toString().trim(), (int) R.drawable.img);
+                    img_Appointment.setTag("1");
+                    img_Appointment.setContentDescription(json.getString("a_photo").toString().trim());
                     final ImageView imageView2 = img_Appointment;
                     img_Appointment.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
@@ -490,6 +501,79 @@ public class MedicalMenuListActivity extends Activity implements OnClickListener
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

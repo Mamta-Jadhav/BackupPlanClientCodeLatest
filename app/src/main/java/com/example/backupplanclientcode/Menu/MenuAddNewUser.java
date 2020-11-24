@@ -74,6 +74,7 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
         if (getIntent().hasExtra("id")) {
             getEdituserDetail();
             this.actionBarTittle.setText(getResources().getString(R.string.txt_edit_user));
+            edit_Password.setVisibility(View.INVISIBLE);
             return;
         }
         this.actionBarTittle.setText(getResources().getString(R.string.txt_add_guest_user));
@@ -121,6 +122,7 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
                 nameValuePairs.put("username", this.edit_Username.getText().toString());
                 nameValuePairs.put("email", this.edit_email.getText().toString());
                 nameValuePairs.put("password", this.edit_Password.getText().toString());
+                nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.edit_guest_user, nameValuePairs, 400, "post").execute(new Void[0]);
             } catch (Exception e) {
             }
@@ -142,6 +144,7 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
                 nameValuePairs.put("username", this.edit_Username.getText().toString());
                 nameValuePairs.put("email", this.edit_email.getText().toString());
                 nameValuePairs.put("password", this.edit_Password.getText().toString());
+                nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.add_guest_user, nameValuePairs, 300, "post").execute(new Void[0]);
             }catch (Exception e){}
         }
@@ -199,17 +202,18 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -218,16 +222,19 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -237,7 +244,6 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -251,15 +257,18 @@ public class MenuAddNewUser extends Activity implements OnClickListener, Respons
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

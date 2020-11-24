@@ -4,9 +4,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.example.backupplanclientcode.Constant.Constant;
-import com.example.backupplanclientcode.Preference.SettingPreference;
-
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -22,7 +19,6 @@ public class LogOutTimerUtil {
     static final int LOGOUT_TIME = 300000; // delay in milliseconds i.e. 5 min = 300000 ms or use timeout argument
     public static String logout = "false";
     public static boolean foreGround = false;
-
 
     public static synchronized void startLogoutTimer(final Context context, final LogOutListener logOutListener) {
         if (longTimer != null) {
@@ -90,6 +86,4 @@ public class LogOutTimerUtil {
             return false;
         }
     }
-
 }
-

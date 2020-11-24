@@ -64,6 +64,7 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
                     } else {
                         nameValuePair.put("notification_flag", "0");
                     }
+                    nameValuePair.put("token", MenuNotification.this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(MenuNotification.this, ServiceUrl.save_notification, nameValuePair, 1, "post").execute(new Void[0]);
                 } catch (Exception e) {
                 }
@@ -99,17 +100,18 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -118,16 +120,19 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -137,7 +142,6 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -151,15 +155,18 @@ public class MenuNotification extends Activity implements ResponseListener_Gener
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

@@ -2,10 +2,15 @@ package com.example.backupplanclientcode.Menu;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +40,11 @@ import com.example.backupplanclientcode.Utility.CompressImage;
 import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,11 +89,11 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         this.connection = new ConnectionDetector(getApplicationContext());
         new Bugsense().startBugsense(getApplicationContext());
         findViewId();
-//        checkAlredySaveAccount();
+        checkAlredySaveAccount();
     }
 
     private void checkAlredySaveAccount() {
-        if (this.pref.getStringValue(Constant.long_term_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        if (this.pref.getStringValue(Constant.long_term_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.long_term_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
             this.actionBarTittle.setText(getResources().getString(R.string.menu_longTermCare));
             addMoreImages();
         } else {
@@ -95,9 +104,9 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
             if (this.connection.isConnectingToInternet()) {
                 try {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", "2");// this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//                    nameValuePair.put("long_term_id", "2");//this.pref.getStringValue(Constant.long_term_id, ""));
+                    nameValuePair.put("long_term_id", this.pref.getStringValue(Constant.long_term_id, ""));
                     new GeneralTask(this, ServiceUrl.get_long_term_care_detail, nameValuePair, 2, "post").execute(new Void[0]);
                 } catch (Exception e) {
                 }
@@ -121,6 +130,7 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         this.yesNoLongTermCare = (ToggleButton) findViewById(R.id.yesNoLongTermCare);
         this.yesNoLongTermCare.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.d("test", isChecked + "");
                 if (isChecked) {
                     LongTermCareMenuActivity.this.layout_images.setVisibility(View.VISIBLE);
                 } else {
@@ -146,7 +156,7 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == -1 && requestCode == 1) {
-            Uri selectedImageUri = data.getData();
+            /*Uri selectedImageUri = data.getData();
             String[] filePathColumn = {"_data"};
             Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
             cursor.moveToFirst();
@@ -160,8 +170,53 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
                 } else {
                     this.currentImageVew.setContentDescription(picturePath.toString());
                 }
+            }*/
+
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+
+            this.currentImageVew.setImageBitmap(selectedImage);
+            this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.currentImageVew.setContentDescription(finalFile.getPath());
+//            if (this.currentImageVew.getTag().toString().equalsIgnoreCase("image")) {
+//                if (this.currentImageVew.getContentDescription().toString().equalsIgnoreCase("")) {
+//                    this.currentImageVew.setContentDescription(finalFile.getPath());
+//                    addMoreImages();
+//                } else {
+//                    this.currentImageVew.setContentDescription(finalFile.getPath());
+//                }
+//            }
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            Log.d("test", "currentImageVew.getTag().toString() " + currentImageVew.getTag().toString());
+
         }
+
         if (resultCode == -1 && requestCode == 2) {
             Uri selectedImageUri2 = data.getData();
             String[] filePathColumn2 = {"_data"};
@@ -175,12 +230,26 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         }
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
+    }
+
     @SuppressLint({"InflateParams"})
     private void addMoreImages() {
         final View moreImagesLayout = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
         this.layout_images.addView(moreImagesLayout);
         final ImageView iv = (ImageView) moreImagesLayout.findViewById(R.id.iv);
-        iv.setTag("image");
+//        iv.setTag("image");
         iv.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 LongTermCareMenuActivity.this.currentImageVew = iv;
@@ -246,14 +315,16 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
             for (int i = 0; i < this.layout_images.getChildCount(); i++) {
                 ImageView iv = (ImageView) ((ViewGroup) this.layout_images.getChildAt(i)).findViewById(R.id.iv);
                 if (!iv.getContentDescription().toString().trim().isEmpty()) {
+                    String[] arr = iv.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", iv.getContentDescription().toString());
-                    item_map.put("image_name", "image" + i);
+                    item_map.put("image_name", "long_term_care_images[]");
                     this.list_images.add(item_map);
                     if (this.collectImages.equalsIgnoreCase("")) {
-                        this.collectImages = this.collectImages.concat("image" + i);
+                        this.collectImages = this.collectImages.concat(atr);
                     } else {
-                        this.collectImages = this.collectImages.concat(",image" + i);
+                        this.collectImages = this.collectImages.concat("," + atr);
                     }
                     if (!iv.getTag().toString().trim().isEmpty()) {
                         if (this.delete_images.equalsIgnoreCase("")) {
@@ -298,15 +369,12 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (response.has("success") && response.getString("success").equalsIgnoreCase("1")) {
-                JSONObject json = response.getJSONObject("long_term_care");
-                if (json.getString("is_long_term_policy").equalsIgnoreCase("1")) {
-                    this.yesNoLongTermCare.setChecked(true);
-                } else {
-                    this.yesNoLongTermCare.setChecked(false);
-                }
+            } else {
+                JSONObject json1 = response.getJSONObject("longterm");
+                JSONObject json = json1.getJSONObject("longterm");
                 this.long_term_id = json.getString("long_term_id").toString().trim();
-                JSONArray jsonArray = json.getJSONArray("long_care_images");
+
+                JSONArray jsonArray = response.getJSONArray("long_care_images");
                 for (int i = 0; i < jsonArray.length(); i++) {
                     final View moreImagesLayout = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
                     JSONObject jsonImages = jsonArray.getJSONObject(i);
@@ -340,6 +408,14 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
                         iv.setEnabled(false);
                     }
                     this.layout_images.addView(moreImagesLayout);
+
+                    if (json.getString("is_long_term_policy").equalsIgnoreCase("1")) {
+                        this.yesNoLongTermCare.setChecked(true);
+                        LongTermCareMenuActivity.this.layout_images.setVisibility(View.VISIBLE);
+                    } else {
+                        this.yesNoLongTermCare.setChecked(false);
+                        LongTermCareMenuActivity.this.layout_images.setVisibility(View.GONE);
+                    }
                 }
                 addMoreImages();
             }
@@ -371,17 +447,18 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -390,16 +467,19 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -409,7 +489,6 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -423,15 +502,18 @@ public class LongTermCareMenuActivity extends Activity implements OnClickListene
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

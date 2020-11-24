@@ -26,15 +26,12 @@ import com.example.backupplanclientcode.Menu.EmployerMenuActivity;
 import com.example.backupplanclientcode.Menu.InsuranceMenuActivity;
 import com.example.backupplanclientcode.Menu.InternetMenuActivity;
 import com.example.backupplanclientcode.Menu.MedicalMenuListActivity;
-import com.example.backupplanclientcode.Menu.MenuAddCouponActivity;
 import com.example.backupplanclientcode.Menu.MenuGuestUserActivity;
 import com.example.backupplanclientcode.Menu.MenuNotification;
 import com.example.backupplanclientcode.Menu.MenuPasswordActivity;
 import com.example.backupplanclientcode.Menu.MenuResourceActivity;
-import com.example.backupplanclientcode.Menu.MenuUpgrade;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
-import com.example.backupplanclientcode.Utility.Utility;
 
 import org.json.JSONObject;
 
@@ -45,6 +42,7 @@ import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
 import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
 
 public class MenuListActivity extends Activity implements OnClickListener, GeneralTask.ResponseListener_General, LogOutTimerUtil.LogOutListener {
+
     LinearLayout account_menu;
     Button btn_setting;
     DBHelper dbHelper;
@@ -114,8 +112,8 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         this.menu_emergency = findViewById(R.id.menu_emergency);
         this.menu_resource = findViewById(R.id.menu_resource);
         this.menu_notificaion = findViewById(R.id.menu_notificaion);
-        this.menu_add_coupon = findViewById(R.id.menu_add_coupon);
-        this.menu_upgrade = findViewById(R.id.menu_upgrade);
+//        this.menu_add_coupon = findViewById(R.id.menu_add_coupon);
+//        this.menu_upgrade = findViewById(R.id.menu_upgrade);
         this.menu_guest_user = findViewById(R.id.menu_guest_user);
         this.menu_password = findViewById(R.id.menu_password);
         this.btn_setting = findViewById(R.id.btn_setting);
@@ -133,8 +131,8 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         this.menu_guest_user.setOnClickListener(this);
         this.menu_password.setOnClickListener(this);
         this.menu_notificaion.setOnClickListener(this);
-        this.menu_add_coupon.setOnClickListener(this);
-        this.menu_upgrade.setOnClickListener(this);
+//        this.menu_add_coupon.setOnClickListener(this);
+//        this.menu_upgrade.setOnClickListener(this);
         this.tv_guest_user_entres = findViewById(R.id.tv_guest_user_entres);
         this.btn_setting.setOnClickListener(this);
         if (this.pref.getBooleanValue(Constant.showAlertFirstTime, false)) {
@@ -151,9 +149,14 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
             this.tv_notificaion_status.setText("OFF");
         }
         try {
-            Cursor cur = this.dbHelper.getGuestUserList(this.pref.getStringValue(Constant.user_id, ""));
-            if (cur != null) {
-                this.tv_guest_user_entres.setText("" + cur.getCount() + " Entries");
+//            Cursor cur = this.dbHelper.getGuestUserList(this.pref.getStringValue(Constant.user_id, ""));
+//            if (cur != null) {
+            if (!pref.getStringValue(Constant.guestCount, "").equalsIgnoreCase("") && !pref.getStringValue(Constant.guestCount, "").equalsIgnoreCase("0")) {
+                this.tv_guest_user_entres.setVisibility(View.VISIBLE);
+                this.tv_guest_user_entres.setText(pref.getStringValue(Constant.guestCount, "") + " Entries");
+//                this.tv_guest_user_entres.setText("" + cur.getCount() + " Entries");
+            } else {
+                this.tv_guest_user_entres.setVisibility(View.GONE);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,10 +217,19 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         switch (v.getId()) {
             case R.id.btn_setting /*2131558591*/:
                 try {
-                    JSONObject nameValuePairs = new JSONObject();
-                    nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
 
-                    new GeneralTask(this, ServiceUrl.logout, nameValuePairs, 1, "get").execute();
+                    if (!this.pref.getStringValue(Constant.jwttoken, "").equalsIgnoreCase("")) {
+                        JSONObject nameValuePairs = new JSONObject();
+                        nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+
+                        new GeneralTask(this, ServiceUrl.logout, nameValuePairs, 1, "get").execute();
+                    } else {
+                        displayToast("User logged out successfully.");
+                        this.pref.setBooleanValue(Constant.isLogin, false);
+                        this.pref.setBooleanValue(Constant.isGuestLogin, false);
+                        startActivity(new Intent(getApplicationContext(), loginActivity.class));
+                        finish();
+                    }
 
                 } catch (Exception e) {
                     Log.d("test", "Error in login JsonObject");
@@ -286,17 +298,17 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 //                showInvalidSubscriptionAlert();
 //                return;
             case R.id.menu_password /*2131559002*/:
-//                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-                startActivity(new Intent(getApplicationContext(), MenuPasswordActivity.class));
+                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                    startActivity(new Intent(getApplicationContext(), MenuPasswordActivity.class));
+                    return;
+                }
                 return;
-//                }
-//                return;
-            case R.id.menu_add_coupon /*2131559005*/:
+            /* case R.id.menu_add_coupon *//*2131559005*//*:
 //                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false) || this.pref.getStringValue(Constant.subscription, "").contains("sub")) {
                 startActivity(new Intent(getApplicationContext(), MenuAddCouponActivity.class));
                 return;
 //                }
-//                return;
+//                return;*/
             case R.id.menu_resource /*2131559008*/:
 //                if (Utility.isSubscriptionValid(this.pref)) {
                 startActivity(new Intent(getApplicationContext(), MenuResourceActivity.class));
@@ -311,18 +323,18 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 //                }
 //                showInvalidSubscriptionAlert();
 //                return;
-            case R.id.menu_upgrade /*2131559012*/:
+            /*case R.id.menu_upgrade *//*2131559012*//*:
 //                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                 startActivity(new Intent(getApplicationContext(), MenuUpgrade.class));
                 return;
 //                }
-//                return;
+//                return;*/
             case R.id.menu_guest_user /*2131559014*/:
-//                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-                startActivity(new Intent(getApplicationContext(), MenuGuestUserActivity.class));
+                if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                    startActivity(new Intent(getApplicationContext(), MenuGuestUserActivity.class));
+                    return;
+                }
                 return;
-//                }
-//                return;
             default:
                 return;
         }
@@ -348,33 +360,23 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 //        Log.i("Main", "Invoking logout timer");
 //        LogOutTimerTask logoutTimeTask = new LogOutTimerTask();
 //        timer.schedule(logoutTimeTask, 30000); //auto logout in 5 minutes
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (timer != null) {
-//            timer.cancel();
-//            Log.i("Main", "cancel timer");
-//            timer = null;
-//        }
-        check_notification_status();
     }*/
 
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -383,16 +385,19 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -402,7 +407,6 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -416,15 +420,20 @@ public class MenuListActivity extends Activity implements OnClickListener, Gener
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        check_notification_status();
+
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 

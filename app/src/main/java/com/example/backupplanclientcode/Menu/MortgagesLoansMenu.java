@@ -30,17 +30,21 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +59,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MortgagesLoansMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class MortgagesLoansMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     JSONArray LoanJsonArray;
     LinearLayout LoansLayout;
@@ -88,24 +95,24 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
     }
 
     private void check_Save_Edit() {
-//        if (this.pref.getStringValue(Constant.MortgageLoansFlag, "").equalsIgnoreCase("1")) {
-//            this.btn_save.setText("Edit");
-//            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-//                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_Mortgage_loan));
-//            }
-//            if (this.connection.isConnectingToInternet()) {
-//                try {
-//                    JSONObject nameValuePair = new JSONObject();
-//                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
-//                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
-//                    new GeneralTask(this, ServiceUrl.get_loan_mortgage_detail, nameValuePair, 2, "post").execute(new Void[0]);
-//                } catch (Exception e) {
-//                }
-//                return;
-//            }
-//            displayMessage(getResources().getString(R.string.connectionFailMessage));
-//            return;
-//        }
+        if (this.pref.getStringValue(Constant.MortgageLoansFlag, "").equalsIgnoreCase("1")) {
+            this.btn_save.setText("Edit");
+            if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_Mortgage_loan));
+            }
+            if (this.connection.isConnectingToInternet()) {
+                try {
+                    JSONObject nameValuePair = new JSONObject();
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
+                    new GeneralTask(this, ServiceUrl.get_loan_mortgage_detail, nameValuePair, 2, "post").execute(new Void[0]);
+                } catch (Exception e) {
+                }
+                return;
+            }
+            displayMessage(getResources().getString(R.string.connectionFailMessage));
+            return;
+        }
         this.actionBarTittle.setText(getResources().getString(R.string.menu_Mortgage_loan));
         addLoanLayout();
         addMortgageLayout();
@@ -153,11 +160,14 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
             nameValuePairs.add(new BasicNameValuePair("json_data", sendJson.toString()));
             JSONArray array = new JSONArray();
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                if (this.list_images.get(i).get("tag").toString().equalsIgnoreCase("1")) {
+                } else {
+                    entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
 //                array.put(new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
-                Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
-                Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                    nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
+                    Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
+                    Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                }
             }
 
 //            entity.addPart("photo", new StringBody(array.toString()));
@@ -198,17 +208,27 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 jsonbj.put("m_owner3", edit_Register3.getText().toString().trim());
                 jsonbj.put("m_date_purchase", edit_DateOfPurchase.getText().toString().trim());
                 jsonbj.put("m_price", edit_Price.getText().toString().trim());
-                if (img_mortgages.getContentDescription().toString().isEmpty()) {
-                    jsonbj.put("m_photo", "");
-                } else {
+
+                if (!img_mortgages.getContentDescription().toString().isEmpty()) {
                     String[] arr = img_mortgages.getContentDescription().toString().split("/");
                     String atr = arr[arr.length - 1];
-                    jsonbj.put("m_photo", new File(atr));
+                    jsonbj.put("m_photo", atr);
+
+                     if (img_mortgages.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
-                    item_map.put("image_path", atr);
-                    item_map.put("image_name", atr);
+                    item_map.put("image_path", img_mortgages.getContentDescription().toString());
+                    item_map.put("image_name", "m_photo[]");
+                    item_map.put("tag", img_mortgages.getTag().toString());
                     this.list_images.add(item_map);
+                } else {
+                    jsonbj.put("m_photo", "");
+                    jsonbj.put("is_file", 0);
                 }
+
                 this.MortgageJsonArray.put(jsonbj);
             }
             Log.i("list_images", this.list_images.toString());
@@ -236,16 +256,25 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 jsonbj.put("l_payment", edit_Payment.getText().toString().trim());
                 jsonbj.put("l_completion_date", edit_Date.getText().toString().trim());
                 ImageView img_loan = (ImageView) view.findViewById(R.id.img_loan);
-                if (img_loan.getContentDescription().toString().isEmpty()) {
-                    jsonbj.put("l_photo", "");
-                } else {
+
+                if (!img_loan.getContentDescription().toString().isEmpty()) {
                     String[] arr = img_loan.getContentDescription().toString().split("/");
                     String atr = arr[arr.length - 1];
-                    jsonbj.put("l_photo", new File(atr));
+                    jsonbj.put("l_photo", atr);
+
+                    if (img_loan.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
-                    item_map.put("image_path", atr);
-                    item_map.put("image_name", atr);
+                    item_map.put("image_path", img_loan.getContentDescription().toString());
+                    item_map.put("image_name", "l_photo[]");
+                    item_map.put("tag", img_loan.getTag().toString());
                     this.list_images.add(item_map);
+                } else {
+                    jsonbj.put("m_photo", "");
+                    jsonbj.put("is_file", 0);
                 }
                 this.LoanJsonArray.put(jsonbj);
             }
@@ -266,6 +295,7 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
             }
         });
         final ImageView img_mortgages = (ImageView) MortgageView.findViewById(R.id.img_mortgages);
+        //img_mortgages.setTag("1");
         img_mortgages.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 MortgagesLoansMenu.this.currentImageVew = img_mortgages;
@@ -308,6 +338,7 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
             }
         });
         final ImageView img_loan = (ImageView) LoanView.findViewById(R.id.img_loan);
+        // img_loan.setTag("1");
         img_loan.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 MortgagesLoansMenu.this.currentImageVew = img_loan;
@@ -389,6 +420,7 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
 
             this.currentImageVew.setImageBitmap(selectedImage);
             this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
+            this.currentImageVew.setTag("0");
             // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
             Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
 
@@ -403,6 +435,7 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
@@ -472,6 +505,8 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 });
                 final ImageView img_mortgages = (ImageView) MortgageView.findViewById(R.id.img_mortgages);
                 UrlImageViewHelper.setUrlDrawable(img_mortgages, json.getString("m_photo").toString().trim(), (int) R.drawable.img);
+                img_mortgages.setContentDescription(json.getString("m_photo").toString().trim());
+                img_mortgages.setTag("1");
                 img_mortgages.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         MortgagesLoansMenu.this.currentImageVew = img_mortgages;
@@ -534,6 +569,8 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
                 });
                 final ImageView img_loan = (ImageView) loanView.findViewById(R.id.img_loan);
                 UrlImageViewHelper.setUrlDrawable(img_loan, json.getString("l_photo").toString().trim(), (int) R.drawable.img);
+                img_loan.setContentDescription(json.getString("l_photo").toString().trim());
+                img_loan.setTag("1");
                 img_loan.setOnClickListener(new OnClickListener() {
                     public void onClick(View v) {
                         MortgagesLoansMenu.this.currentImageVew = img_loan;
@@ -562,12 +599,14 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
 
     public void on_ProfileSuccess(JSONObject response) {
         try {
-            if (response.has("message")) {
-                displayMessage(response.getString("message").toString());
-            }
-            if (response.has("success") && response.getString("success").toString().trim().equalsIgnoreCase("1")) {
-                this.pref.setStringValue(Constant.MortgageLoansFlag, response.getString("success").toString());
-                finish();
+            if (response != null) {
+                if (response.has("message")) {
+                    displayMessage(response.getString("message").toString());
+                }
+                if (response.has("success") && response.getString("success").toString().trim().equalsIgnoreCase("1")) {
+                    this.pref.setStringValue(Constant.MortgageLoansFlag, response.getString("success").toString());
+                    finish();
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -576,5 +615,78 @@ public class MortgagesLoansMenu extends Activity implements OnClickListener, Res
 
     private void displayMessage(String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
     }
 }

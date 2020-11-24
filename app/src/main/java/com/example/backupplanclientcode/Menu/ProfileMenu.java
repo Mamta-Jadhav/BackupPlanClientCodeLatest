@@ -7,8 +7,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,13 +33,19 @@ import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
 import com.example.backupplanclientcode.CustomeFiledActivity;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +60,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ProfileMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class ProfileMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_IMAGE = 4;
     private static final int SELECT_PICTURE = 2;
     private static final int SELECT_SIBLING = 3;
@@ -104,7 +117,6 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
     JSONArray jsonArr_pets;
     JSONArray jsonArr_sibling;
     JSONObject json_profile = new JSONObject();
-    LayoutInflater linf;
     ArrayList<HashMap<String, String>> list_images;
     LinearLayout mainLayout;
     ImageView petIcon;
@@ -131,6 +143,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
     }
 
     private void gettingProfile() {
+        Log.d("test", "Profile ID : " + this.pref.getStringValue(Constant.profile_id, ""));
         if (!this.connection.isConnectingToInternet()) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
             ADDParentToLayout(true);
@@ -139,7 +152,8 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             customFiled.add(getResources().getString(R.string.hint_sister));
             addSiblingLayout(this.siblingCount, customFiled, 3);
             addPetSLayout(this.petlayoutCount);
-        } else if (this.pref.getStringValue(Constant.profile_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.profile_id, "").isEmpty() || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+        } else if (this.pref.getStringValue(Constant.profile_id, "").equalsIgnoreCase("0") || this.pref.getStringValue(Constant.user_id, "").isEmpty()) {
+            this.btn_save.setText("Save");
             this.actionBarTittle.setText(getResources().getString(R.string.menu_profile));
             ADDParentToLayout(true);
             ArrayList<String> customFiled2 = new ArrayList<>();
@@ -150,11 +164,11 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
         } else {
             try {
                 JSONObject nameValuePairs = new JSONObject();
-//                nameValuePairs.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
+                nameValuePairs.put("profile_id", this.pref.getStringValue(Constant.profile_id, ""));
                 nameValuePairs.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePairs.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_profile_detail, nameValuePairs, 2, "post").execute(new Void[0]);
-                this.btn_save.setText("Save");
+                this.btn_save.setText("Edit");
                 if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
                     this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_profile));
                 }
@@ -312,8 +326,6 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
         this.sibling_add_icon.setOnClickListener(this);
         this.childrenAddIcon.setOnClickListener(this);
         this.petIcon.setOnClickListener(this);
-        this.linf = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this.linf = LayoutInflater.from(this);
         this.mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
         if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             setEnableControl();
@@ -366,7 +378,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
 
     @SuppressLint({"InflateParams"})
     private void addPetSLayout(int count) {
-        final View view = this.linf.inflate(R.layout.layout_pets, null);
+        final View view = LayoutInflater.from(this).inflate(R.layout.layout_pets, null);
         ImageView removepetIcon = (ImageView) view.findViewById(R.id.removepetIcon);
         removepetIcon.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -405,7 +417,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
     @SuppressLint({"InflateParams"})
     private void child_more_images(final View view, boolean flag) {
         LinearLayout layout_images = (LinearLayout) view.findViewById(R.id.layout_images);
-        final View view_images = this.linf.inflate(R.layout.layout_images, null);
+        final View view_images = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
         final ImageView addMoreImage = (ImageView) view_images.findViewById(R.id.iv);
         Button btn_remove = (Button) view_images.findViewById(R.id.btn_remove);
         addMoreImage.setTag("image");
@@ -448,7 +460,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
     @SuppressLint({"InflateParams"})
     private void addSiblingLayout(int count, ArrayList<String> arrayList, int flag) {
         if (flag != 0) {
-            final View view = this.linf.inflate(R.layout.sibling_layout, null);
+            final View view = LayoutInflater.from(this).inflate(R.layout.sibling_layout, null);
             ImageView removeSiblingIcon = (ImageView) view.findViewById(R.id.removeSiblingIcon);
             removeSiblingIcon.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -483,7 +495,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
 
     @SuppressLint({"InflateParams"})
     public void ADDParentToLayout(boolean flag) {
-        final View view = this.linf.inflate(R.layout.layout_parent, null);
+        final View view = LayoutInflater.from(this).inflate(R.layout.layout_parent, null);
         ImageView removeChildIcon = (ImageView) view.findViewById(R.id.removeChildIcon);
         removeChildIcon.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -530,26 +542,66 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             addSiblingLayout(this.siblingCount, data.getStringArrayListExtra("customFieldList"), data.getIntExtra("sibling_flag", 0));
             this.siblingCount++;
         } else if (resultCode == -1 && requestCode == 2) {
-            Uri selectedImageUri = data.getData();
-            String[] filePathColumn = {"_data"};
-            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            Uri selectedImageUri = data.getData();
+//            String[] filePathColumn = {"_data"};
+//            Cursor cursor = getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+//            cursor.close();
+//            this.current_imageview.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
-            String picturePath = cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-            cursor.close();
-            this.current_imageview.setImageBitmap(this.compress.compressImage(selectedImageUri.toString(), picturePath));
+            Log.d("test", cursor.getString(nameIndex));
+            this.current_imageview.setImageBitmap(selectedImage);
+            this.current_imageview.setContentDescription(cursor.getString(nameIndex));
+            this.current_imageview.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            this.current_imageview.setContentDescription(finalFile.getPath());
+            this.current_imageview.setTag("0");
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            this.current_imageview.setContentDescription(finalFile.getPath());
             if (this.current_imageview.getTag().toString().equalsIgnoreCase("image")) {
                 Log.e("equalsIgnoreCase(image)", "......if");
                 if (this.current_imageview.getContentDescription().toString().equalsIgnoreCase("")) {
                     Log.e("!equalsIgnoreCase()", "......if");
-                    this.current_imageview.setContentDescription(picturePath.toString());
+                    this.current_imageview.setContentDescription(finalFile.getPath());
                     child_more_images(this.current_view, true);
                 } else {
-                    this.current_imageview.setContentDescription(picturePath.toString());
+                    this.current_imageview.setContentDescription(finalFile.getPath());
                     Log.e("!equalsIgnoreCase()", "......else");
                 }
             }
             ((Button) this.current_view.findViewById(R.id.btn_remove)).setVisibility(View.VISIBLE);
-            Log.e("select image path", picturePath.toString());
+            Log.e("select image path", finalFile.getPath());
             if (this.current_imageview.getTag().toString().equalsIgnoreCase("image")) {
                 return;
             }
@@ -559,16 +611,68 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 this.delete_images = this.delete_images.concat("," + this.current_imageview.getTag().toString());
             }
         } else if (resultCode == -1 && requestCode == 4) {
-            Uri selectedImageUri2 = data.getData();
-            String[] filePathColumn2 = {"_data"};
-            Cursor cursor2 = getContentResolver().query(selectedImageUri2, filePathColumn2, null, null, null);
-            cursor2.moveToFirst();
-            String picturePath2 = cursor2.getString(cursor2.getColumnIndex(filePathColumn2[0]));
-            cursor2.close();
-            this.current_imageview.setImageBitmap(this.compress.compressImage(selectedImageUri2.toString(), picturePath2));
-            this.current_imageview.setContentDescription(picturePath2.toString());
-            Log.e("select image path", picturePath2.toString());
+//            Uri selectedImageUri2 = data.getData();
+//            String[] filePathColumn2 = {"_data"};
+//            Cursor cursor2 = getContentResolver().query(selectedImageUri2, filePathColumn2, null, null, null);
+//            cursor2.moveToFirst();
+//            String picturePath2 = cursor2.getString(cursor2.getColumnIndex(filePathColumn2[0]));
+//            cursor2.close();
+//            this.current_imageview.setImageBitmap(this.compress.compressImage(selectedImageUri2.toString(), picturePath2));
+//            this.current_imageview.setContentDescription(picturePath2.toString());
+//            Log.e("select image path", picturePath2.toString());
+
+            final Uri imageUri = data.getData();
+            InputStream imageStream = null;
+            try {
+                imageStream = getContentResolver().openInputStream(imageUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            Cursor cursor = getContentResolver().query(imageUri, null, null, null, null);
+            /*
+             * Get the column indexes of the data in the Cursor,
+             * move to the first row in the Cursor, get the data,
+             * and display it.
+             */
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            Log.d("test", cursor.getString(nameIndex));
+            this.current_imageview.setImageBitmap(selectedImage);
+            this.current_imageview.setContentDescription(cursor.getString(nameIndex));
+            this.current_imageview.setTag("0");
+            Log.d("test", "selectedImage " + selectedImage);
+            Log.d("test", "imageUri.getPath() " + imageUri.getPath());
+            // CALL THIS METHOD TO GET THE URI FROM THE BITMAP
+            Uri tempUri = getImageUri(getApplicationContext(), selectedImage);
+
+            // CALL THIS METHOD TO GET THE ACTUAL PATH
+            File finalFile = new File(getRealPathFromURI(tempUri));
+
+            System.out.println(finalFile.getAbsoluteFile());
+            System.out.println(finalFile.getName());
+            try {
+                System.out.println(finalFile.getCanonicalPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.current_imageview.setContentDescription(finalFile.getPath());
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    public String getRealPathFromURI(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+        return cursor.getString(idx);
     }
 
     private void PrepareJsonArray() {
@@ -583,23 +687,39 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 obj.put("child_name", ((EditText) parent.findViewById(R.id.et)).getText().toString());
                 obj.put("children_id", edit_children_id.getText().toString().trim());
                 String str = "";
+                int countImg = 0;
                 for (int j = 0; j < layout_images.getChildCount(); j++) {
                     HashMap<String, String> item_map = new HashMap<>();
                     ImageView iv = (ImageView) ((ViewGroup) layout_images.getChildAt(j)).findViewById(R.id.iv);
                     if (!iv.getContentDescription().toString().equalsIgnoreCase("")) {
-                        Log.e("is not Empty", "...." + iv.getContentDescription().toString());
-                        if (str.equalsIgnoreCase("")) {
-                            str = iv.getTag().toString() + count;
-                        } else {
-                            str = str + "," + iv.getTag() + count;
+                        if (iv.getTag().toString().equalsIgnoreCase("0")){
+                            countImg++;
                         }
-                        item_map.put("image_name", iv.getTag().toString() + count);
+                        Log.e("is not Empty", "...." + iv.getContentDescription().toString());
+                        String[] arr = iv.getContentDescription().toString().split("/");
+                        String atr = arr[arr.length - 1];
+                        if (str.equalsIgnoreCase("")) {
+                            str = atr;
+                        } else {
+                            str = str + "," + atr;
+                        }
+//                         if (str.equalsIgnoreCase("")) {
+//                            str = iv.getTag().toString() + count;
+//                        } else {
+//                            str = str + "," + iv.getTag() + count;
+//                        }
+                        item_map.put("image_name", "children_images[]");
                         item_map.put("image_path", iv.getContentDescription().toString());
+                        item_map.put("tag", iv.getTag().toString());
+                        obj.put("no_of_photo", countImg);
                         count++;
                         this.list_images.add(item_map);
                     } else {
                         Log.e("is Empty", "...." + iv.getContentDescription().toString());
                     }
+                }
+                if (!obj.has("no_of_photo")) {
+                    obj.put("no_of_photo", 0);
                 }
                 obj.put("children_images", str);
             } catch (JSONException e) {
@@ -646,92 +766,200 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             nameValuePairs.add(new BasicNameValuePair("json_data", this.json_profile.toString()));
             Log.i("Send Json data", this.json_profile.toString());
             for (int i = 0; i < this.list_images.size(); i++) {
-                File file = new File((String) ((HashMap) this.list_images.get(i)).get("image_path"));
-                multipartEntity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(file));
-                Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
-                Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+
+                String tag = (String) ((HashMap) this.list_images.get(i)).get("tag");
+                if (tag.equalsIgnoreCase("0")) {
+                    File file = new File((String) ((HashMap) this.list_images.get(i)).get("image_path"));
+                    multipartEntity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(file));
+                    Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
+                    Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                }
             }
             if (!this.imgPassport.getContentDescription().toString().isEmpty()) {
-                File file2 = new File(this.imgPassport.getContentDescription().toString());
-                multipartEntity.addPart("s_passport", new FileBody(file2));
+                String[] arr = this.imgPassport.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgPassport.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file3 = new File(this.imgPassport.getContentDescription().toString());
+                    multipartEntity.addPart("s_passport[]", new FileBody(file3));
+                    Log.i("imgPassport", file3.getName());
+                    Log.i("imgPassport", file3.getPath());
+                    Log.i("imgPassport", this.imgPassport.getContentDescription().toString());
+                }
             }
             if (!this.imgBirthCertificate.getContentDescription().toString().isEmpty()) {
-                File file3 = new File(this.imgBirthCertificate.getContentDescription().toString());
-                multipartEntity.addPart("s_birth_certi", new FileBody(file3));
+                String[] arr = this.imgBirthCertificate.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgBirthCertificate.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file3 = new File(this.imgBirthCertificate.getContentDescription().toString());
+                    multipartEntity.addPart("s_birth_certi[]", new FileBody(file3));
+                }
+                Log.i("imgBirthCertificate", this.imgBirthCertificate.getContentDescription().toString());
             }
             if (!this.imgSIN_SSN.getContentDescription().toString().equalsIgnoreCase("")) {
-                File file4 = new File(this.imgSIN_SSN.getContentDescription().toString());
-                FileBody fileBody = new FileBody(file4);
-                multipartEntity.addPart("s_ssn", fileBody);
+                String[] arr = this.imgSIN_SSN.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgSIN_SSN.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file4 = new File(this.imgSIN_SSN.getContentDescription().toString());
+                    FileBody fileBody = new FileBody(file4);
+                    multipartEntity.addPart("s_ssn[]", fileBody);
+                }
+                Log.i("imgSIN_SSN", this.imgSIN_SSN.getContentDescription().toString());
             }
             if (!this.imgImmigrationPapers.getContentDescription().toString().isEmpty()) {
-                File file5 = new File(this.imgImmigrationPapers.getContentDescription().toString());
-                multipartEntity.addPart("s_citizen_paper", new FileBody(file5));
+                String[] arr = this.imgImmigrationPapers.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgImmigrationPapers.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file5 = new File(this.imgImmigrationPapers.getContentDescription().toString());
+                    multipartEntity.addPart("s_citizen_paper[]", new FileBody(file5));
+                }
+                Log.i("imgImmigrationPapers", this.imgImmigrationPapers.getContentDescription().toString());
             }
             if (!this.imgWillPowerAttorney.getContentDescription().toString().isEmpty()) {
-                File file6 = new File(this.imgWillPowerAttorney.getContentDescription().toString());
-                FileBody fileBody2 = new FileBody(file6);
-                multipartEntity.addPart("s_power_attorney", fileBody2);
+                String[] arr = this.imgWillPowerAttorney.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgWillPowerAttorney.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file6 = new File(this.imgWillPowerAttorney.getContentDescription().toString());
+                    FileBody fileBody2 = new FileBody(file6);
+                    multipartEntity.addPart("s_power_attorney[]", fileBody2);
+                }
+                Log.i("imgWillPowerAttorney", this.imgWillPowerAttorney.getContentDescription().toString());
             }
             if (!this.imgTrust.getContentDescription().toString().isEmpty()) {
-                File file7 = new File(this.imgTrust.getContentDescription().toString());
-                FileBody fileBody3 = new FileBody(file7);
-                multipartEntity.addPart("s_trust", fileBody3);
+                String[] arr = this.imgTrust.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgTrust.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file7 = new File(this.imgTrust.getContentDescription().toString());
+                    FileBody fileBody3 = new FileBody(file7);
+                    multipartEntity.addPart("s_trust[]", fileBody3);
+                }
+                Log.i("imgTrust", this.imgTrust.getContentDescription().toString());
             }
             if (!this.imgWarVeteranRecords.getContentDescription().toString().isEmpty()) {
-                File file8 = new File(this.imgWarVeteranRecords.getContentDescription().toString());
-                FileBody fileBody4 = new FileBody(file8);
-                multipartEntity.addPart("s_war_record", fileBody4);
+                String[] arr = this.imgWarVeteranRecords.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgWarVeteranRecords.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file8 = new File(this.imgWarVeteranRecords.getContentDescription().toString());
+                    FileBody fileBody4 = new FileBody(file8);
+                    multipartEntity.addPart("s_war_record[]", fileBody4);
+                }
+                Log.i("imgWarVeteranRecords", this.imgWarVeteranRecords.getContentDescription().toString());
             }
             if (!this.imgOrganDonationRecords.getContentDescription().toString().isEmpty()) {
-                File file9 = new File(this.imgOrganDonationRecords.getContentDescription().toString());
-                multipartEntity.addPart("s_donation_rec", new FileBody(file9));
+                String[] arr = this.imgOrganDonationRecords.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgOrganDonationRecords.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file9 = new File(this.imgOrganDonationRecords.getContentDescription().toString());
+                    multipartEntity.addPart("s_donation_rec[]", new FileBody(file9));
+                }
+                Log.i("imgOrganDonationRecords", this.imgOrganDonationRecords.getContentDescription().toString());
             }
             if (!this.imgMarriageCertificate.getContentDescription().toString().isEmpty()) {
-                File file10 = new File(this.imgMarriageCertificate.getContentDescription().toString());
-                multipartEntity.addPart("m_marriege_certi", new FileBody(file10));
+                String[] arr = this.imgMarriageCertificate.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgMarriageCertificate.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file10 = new File(this.imgMarriageCertificate.getContentDescription().toString());
+                    multipartEntity.addPart("m_marriege_certi[]", new FileBody(file10));
+                }
+                Log.i("imgMarriageCertificate", this.imgMarriageCertificate.getContentDescription().toString());
             }
             if (!this.imgPreMarriageAgreements.getContentDescription().toString().isEmpty()) {
-                File file11 = new File(this.imgPreMarriageAgreements.getContentDescription().toString());
-                multipartEntity.addPart("m_marriege_agree", new FileBody(file11));
+                String[] arr = this.imgPreMarriageAgreements.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgPreMarriageAgreements.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file11 = new File(this.imgPreMarriageAgreements.getContentDescription().toString());
+                    multipartEntity.addPart("m_marriege_agree[]", new FileBody(file11));
+                }
+                Log.i("imgPreMarriaAments", this.imgPreMarriageAgreements.getContentDescription().toString());
             }
             if (!this.imgMaintenanceRecords.getContentDescription().toString().isEmpty()) {
-                File file12 = new File(this.imgMaintenanceRecords.getContentDescription().toString());
-                multipartEntity.addPart("d_maintenance_rec", new FileBody(file12));
+                String[] arr = this.imgMaintenanceRecords.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgMaintenanceRecords.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file12 = new File(this.imgMaintenanceRecords.getContentDescription().toString());
+                    multipartEntity.addPart("d_maintenance_rec[]", new FileBody(file12));
+                }
+                Log.i("imgMaintenanceRecords", this.imgMaintenanceRecords.getContentDescription().toString());
             }
             if (!this.imgAlimony.getContentDescription().toString().isEmpty()) {
-                File file13 = new File(this.imgAlimony.getContentDescription().toString());
-                multipartEntity.addPart("d_alimony", new FileBody(file13));
+                String[] arr = this.imgAlimony.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgAlimony.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file13 = new File(this.imgAlimony.getContentDescription().toString());
+                    multipartEntity.addPart("d_alimony[]", new FileBody(file13));
+                }
+                Log.i("imgAlimony", this.imgAlimony.getContentDescription().toString());
             }
             if (!this.imgChildCustodyRecords.getContentDescription().toString().isEmpty()) {
-                File file14 = new File(this.imgChildCustodyRecords.getContentDescription().toString());
-                multipartEntity.addPart("d_child_custody", new FileBody(file14));
+                String[] arr = this.imgChildCustodyRecords.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgChildCustodyRecords.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file14 = new File(this.imgChildCustodyRecords.getContentDescription().toString());
+                    multipartEntity.addPart("d_child_custody[]", new FileBody(file14));
+                }
+                Log.i("imgChildCustodyRecords", this.imgChildCustodyRecords.getContentDescription().toString());
             }
             if (!this.imgDivorceDecreeCertificate.getContentDescription().toString().isEmpty()) {
-                File file15 = new File(this.imgDivorceDecreeCertificate.getContentDescription().toString());
-                multipartEntity.addPart("d_divorce_certi", new FileBody(file15));
+                String[] arr = this.imgDivorceDecreeCertificate.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgDivorceDecreeCertificate.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file15 = new File(this.imgDivorceDecreeCertificate.getContentDescription().toString());
+                    multipartEntity.addPart("d_divorce_certi[]", new FileBody(file15));
+                }
+                Log.i("imgDivrceDecreCert", this.imgDivorceDecreeCertificate.getContentDescription().toString());
             }
             if (!this.imgSeparationAgreement.getContentDescription().toString().isEmpty()) {
-                File file16 = new File(this.imgSeparationAgreement.getContentDescription().toString());
-                multipartEntity.addPart("d_sepration_agree", new FileBody(file16));
+                String[] arr = this.imgSeparationAgreement.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgSeparationAgreement.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file16 = new File(this.imgSeparationAgreement.getContentDescription().toString());
+                    multipartEntity.addPart("d_sepration_agree[]", new FileBody(file16));
+                }
+                Log.i("imgSeparationAgreement", this.imgSeparationAgreement.getContentDescription().toString());
             }
             if (!this.imgDeathCertificate.getContentDescription().toString().isEmpty()) {
-                File file17 = new File(this.imgDeathCertificate.getContentDescription().toString());
-                FileBody fileBody5 = new FileBody(file17);
-                multipartEntity.addPart("w_death_certi", fileBody5);
+                String[] arr = this.imgDeathCertificate.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgDeathCertificate.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    File file17 = new File(this.imgDeathCertificate.getContentDescription().toString());
+                    FileBody fileBody5 = new FileBody(file17);
+                    multipartEntity.addPart("w_death_certi[]", fileBody5);
+                }
+                Log.i("imgDeathCertificate", this.imgDeathCertificate.getContentDescription().toString());
             }
-
             if (!this.imgWill.getContentDescription().toString().isEmpty()) {
-                FileBody fileBody6 = new FileBody(new File(this.imgWill.getContentDescription().toString()));
-                multipartEntity.addPart("w_will", fileBody6);
+                String[] arr = this.imgWill.getContentDescription().toString().split("/");
+                String atr = arr[arr.length - 1];
+                if (this.imgWill.getTag().toString().equalsIgnoreCase("1")) {
+                } else {
+                    FileBody fileBody6 = new FileBody(new File(this.imgWill.getContentDescription().toString()));
+                    multipartEntity.addPart("w_will[]", fileBody6);
+                }
+                Log.i("imgWill", this.imgWill.getContentDescription().toString());
             }
-
             if (!this.connection.isConnectingToInternet()) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("save")) {
+                Log.d("test", "Here1");
                 SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.save_profile, multipartEntity);
                 saveProfileAsytask.execute(new Void[0]);
             } else {
+                Log.d("test", "Here2");
                 SaveProfileAsytask saveProfileAsytask2 = new SaveProfileAsytask(this, ServiceUrl.edit_profile, multipartEntity);
                 saveProfileAsytask2.execute(new Void[0]);
             }
@@ -772,23 +1000,125 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 jobj.put("p_partner_name", this.edit_SpousePartnerName.getText().toString().trim());
                 jobj.put("p_partner_law", this.edit_CommonLaw.getText().toString().trim());
                 JSONObject json_Relation = new JSONObject();
-                json_Relation.put("s_passport", this.imgPassport.getContentDescription().toString());
-                json_Relation.put("s_birth_certi", this.imgBirthCertificate.getContentDescription().toString());
-                json_Relation.put("s_ssn", this.imgSIN_SSN.getContentDescription().toString());
-                json_Relation.put("s_citizen_paper", this.imgImmigrationPapers.getContentDescription().toString());
-                json_Relation.put("s_power_attorney", this.imgWillPowerAttorney.getContentDescription().toString());
-                json_Relation.put("s_trust", this.imgTrust.getContentDescription().toString());
-                json_Relation.put("s_war_record", this.imgWarVeteranRecords.getContentDescription().toString());
-                json_Relation.put("s_donation_rec", this.imgOrganDonationRecords.getContentDescription().toString());
-                json_Relation.put("m_marriege_certi", this.imgMarriageCertificate.getContentDescription().toString());
-                json_Relation.put("m_marriege_agree", this.imgPreMarriageAgreements.getContentDescription().toString());
-                json_Relation.put("d_maintenance_rec", this.imgMaintenanceRecords.getContentDescription().toString());
-                json_Relation.put("d_alimony", this.imgAlimony.getContentDescription().toString());
-                json_Relation.put("d_child_custody", this.imgChildCustodyRecords.getContentDescription().toString());
-                json_Relation.put("d_divorce_certi", this.imgDivorceDecreeCertificate.getContentDescription().toString());
-                json_Relation.put("d_sepration_agree", this.imgSeparationAgreement.getContentDescription().toString());
-                json_Relation.put("w_death_certi", this.imgDeathCertificate.getContentDescription().toString());
-                json_Relation.put("w_will", this.imgWill.getContentDescription().toString());
+                if (this.imgPassport.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_passport", this.imgPassport.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgPassport.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_passport", atr);
+                }
+                if (this.imgBirthCertificate.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_birth_certi", this.imgBirthCertificate.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgBirthCertificate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_birth_certi", atr);
+                }
+                if (this.imgSIN_SSN.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_ssn", this.imgSIN_SSN.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgSIN_SSN.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_ssn", atr);
+                }
+                if (this.imgImmigrationPapers.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_citizen_paper", this.imgImmigrationPapers.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgImmigrationPapers.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_citizen_paper", atr);
+                }
+                if (this.imgWillPowerAttorney.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_power_attorney", this.imgWillPowerAttorney.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgWillPowerAttorney.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_power_attorney", atr);
+                }
+                if (this.imgTrust.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_trust", this.imgTrust.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgTrust.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_trust", atr);
+                }
+                if (this.imgWarVeteranRecords.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_war_record", this.imgWarVeteranRecords.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgWarVeteranRecords.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_war_record", atr);
+                }
+                if (this.imgOrganDonationRecords.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("s_donation_rec", this.imgOrganDonationRecords.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgOrganDonationRecords.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("s_donation_rec", atr);
+                }
+                if (this.imgMarriageCertificate.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("m_marriege_certi", this.imgMarriageCertificate.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgMarriageCertificate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("m_marriege_certi", atr);
+                }
+                if (this.imgPreMarriageAgreements.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("m_marriege_agree", this.imgPreMarriageAgreements.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgPreMarriageAgreements.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("m_marriege_agree", atr);
+                }
+                if (this.imgMaintenanceRecords.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("d_maintenance_rec", this.imgMaintenanceRecords.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgMaintenanceRecords.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("d_maintenance_rec", atr);
+                }
+                if (this.imgAlimony.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("d_alimony", this.imgAlimony.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgAlimony.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("d_alimony", atr);
+                }
+                if (this.imgChildCustodyRecords.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("d_child_custody", this.imgChildCustodyRecords.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgChildCustodyRecords.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("d_child_custody", atr);
+                }
+                if (this.imgDivorceDecreeCertificate.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("d_divorce_certi", this.imgDivorceDecreeCertificate.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgDivorceDecreeCertificate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("d_divorce_certi", atr);
+                }
+                if (this.imgSeparationAgreement.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("d_sepration_agree", this.imgSeparationAgreement.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgSeparationAgreement.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("d_sepration_agree", atr);
+                }
+                if (this.imgDeathCertificate.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("w_death_certi", this.imgDeathCertificate.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgDeathCertificate.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("w_death_certi", atr);
+                }
+                if (this.imgWill.getContentDescription().toString().equalsIgnoreCase("")) {
+                    json_Relation.put("w_will", this.imgWill.getContentDescription().toString());
+                } else {
+                    String[] arr = this.imgWill.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json_Relation.put("w_will", atr);
+                }
                 jobj.put("relationship", json_Relation);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -857,12 +1187,14 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
         try {
             if (this.btn_save.getText().toString().trim().equalsIgnoreCase("save")) {
                 Toast.makeText(getApplicationContext(), response.getString("message").toString(), Toast.LENGTH_SHORT).show();
-                if (response.getString("success").toString().trim().equalsIgnoreCase("1")) {
+                if (response.has("profile_id")) {
+                    this.pref.setStringValue(Constant.profile_id, response.getString("profile_id").toString().trim());
                 }
             } else {
                 Toast.makeText(getApplicationContext(), response.getString("message").toString(), Toast.LENGTH_LONG).show();
-                this.pref.setStringValue(Constant.profile_id, response.getString("profile_id").toString().trim());
-                if (response.getString("success").toString().toString().trim().equalsIgnoreCase("1")) {
+                if (response.has("profile_id")) {
+                    this.pref.setStringValue(Constant.profile_id, response.getString("profile_id").toString().trim());
+                    finish();
                 }
             }
             if (response.getString("success").toString().trim().equalsIgnoreCase("1")) {
@@ -903,7 +1235,7 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
             } else {
                 for (int i = 0; i < sibling.length(); i++) {
                     JSONObject siblingJson2 = sibling.getJSONObject(i);
-                    View view = this.linf.inflate(R.layout.sibling_layout, null);
+                    View view = LayoutInflater.from(this).inflate(R.layout.sibling_layout, null);
                     ImageView removeSiblingIcon = (ImageView) view.findViewById(R.id.removeSiblingIcon);
                     removeSiblingIcon.setTag(siblingJson2.getString("sibling_id"));
                     final View view2 = view;
@@ -945,11 +1277,11 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 }
             }
             JSONArray childrenJsonArray = response.getJSONObject("children").getJSONArray("children");
-            if (childrenJsonArray.length() <= 1) {
+            if (childrenJsonArray.length() < 1) {
                 ADDParentToLayout(true);
             } else {
                 for (int j = 0; j < childrenJsonArray.length(); j++) {
-                    View view3 = this.linf.inflate(R.layout.layout_parent, null);
+                    View view3 = LayoutInflater.from(this).inflate(R.layout.layout_parent, null);
                     JSONObject children = childrenJsonArray.getJSONObject(j);
                     ((EditText) view3.findViewById(R.id.edit_children_id)).setText(children.getString("children_id"));
                     ImageView removeChildIcon = (ImageView) view3.findViewById(R.id.removeChildIcon);
@@ -980,122 +1312,197 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                         childImage.setEnabled(false);
                         removeChildIcon.setVisibility(View.GONE);
                     }
-                    JSONArray childImages = children.getJSONArray("children_images");
-                    Log.e("Child Images", childImages.toString());
-                    for (int i2 = 0; i2 < childImages.length(); i2++) {
-                        JSONObject childdetail = childImages.getJSONObject(i2);
-                        View viewimages = this.linf.inflate(R.layout.layout_images, null);
-                        ImageView iv = (ImageView) viewimages.findViewById(R.id.iv);
-                        iv.setTag(childdetail.getString("image_id"));
-                        UrlImageViewHelper.setUrlDrawable(iv, childdetail.getString("image").toString(), (int) R.drawable.img);
-                        Button btn_remove = (Button) viewimages.findViewById(R.id.btn_remove);
-                        btn_remove.setTag(childdetail.getString("image_id"));
-                        btn_remove.setVisibility(View.VISIBLE);
-                        if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-                            btn_remove.setVisibility(View.GONE);
-                            iv.setEnabled(false);
-                        }
-                        final View view5 = viewimages;
-                        final ImageView imageView3 = iv;
-                        btn_remove.setOnClickListener(new OnClickListener() {
-                            public void onClick(View v) {
-                                ((ViewGroup) view5.getParent()).removeView(view5);
-                                if (!imageView3.getTag().toString().equalsIgnoreCase("image")) {
-                                    if (ProfileMenu.this.delete_images.equalsIgnoreCase("")) {
-                                        ProfileMenu.this.delete_images = ProfileMenu.this.delete_images.concat(imageView3.getTag().toString());
-                                    } else {
-                                        ProfileMenu.this.delete_images = ProfileMenu.this.delete_images.concat("," + imageView3.getTag().toString());
-                                    }
+                    if (children.has("children_images")) {
+                        JSONArray childImages = children.getJSONArray("children_images");
+                        Log.e("Child Images", childImages.toString());
+                        for (int i2 = 0; i2 < childImages.length(); i2++) {
+                            JSONObject childdetail = childImages.getJSONObject(i2);
+                            final View viewimages = LayoutInflater.from(this).inflate(R.layout.layout_images, null);
+                            final ImageView iv = (ImageView) viewimages.findViewById(R.id.iv);
+                            UrlImageViewHelper.setUrlDrawable(iv, childdetail.getString("image").toString(), (int) R.drawable.img);
+                            iv.setTag(childdetail.getString("image_id"));
+                            iv.setContentDescription(childdetail.getString("image").toString());
+                            final Button btn_remove = (Button) viewimages.findViewById(R.id.btn_remove);
+                            btn_remove.setTag(childdetail.getString("image_id"));
+                            btn_remove.setVisibility(View.VISIBLE);
+//                            if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+//                                btn_remove.setVisibility(View.GONE);
+//                                iv.setEnabled(false);
+//                            }
+//                            final View view5 = viewimages;
+//                            final ImageView imageView3 = iv;
+                            btn_remove.setOnClickListener(new OnClickListener() {
+                                public void onClick(View v) {
+                                    ((ViewGroup) viewimages.getParent()).removeView(viewimages);
+//                                    if (!imageView3.getTag().toString().equalsIgnoreCase("image")) {
+                                        if (ProfileMenu.this.delete_images.equalsIgnoreCase("")) {
+                                            ProfileMenu.this.delete_images = ProfileMenu.this.delete_images.concat(btn_remove.getTag().toString());
+                                        } else {
+                                            ProfileMenu.this.delete_images = ProfileMenu.this.delete_images.concat("," + btn_remove.getTag().toString());
+                                        }
+//                                    }
+                                    Log.i("delete images id", ProfileMenu.this.delete_images);
                                 }
-                                Log.i("delete images id", ProfileMenu.this.delete_images);
-                            }
-                        });
-                        final View view6 = view3;
-                        final ImageView imageView4 = iv;
-                        iv.setOnClickListener(new OnClickListener() {
-                            public void onClick(View v) {
-                                ProfileMenu.this.current_view = view6;
-                                ProfileMenu.this.current_imageview = imageView4;
-                                ProfileMenu.this.current_imageview.setContentDescription("");
-                                Intent intent = new Intent();
-                                intent.setType("image/*");
-                                intent.setAction("android.intent.action.GET_CONTENT");
-                                ProfileMenu.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 2);
-                            }
-                        });
-                        layout_images.addView(viewimages);
+                            });
+                            final View view6 = view3;
+                            final ImageView imageView4 = iv;
+                            iv.setOnClickListener(new OnClickListener() {
+                                public void onClick(View v) {
+                                    ProfileMenu.this.current_view = view6;
+                                    ProfileMenu.this.current_imageview = imageView4;
+                                    ProfileMenu.this.current_imageview.setContentDescription("");
+                                    Intent intent = new Intent();
+                                    intent.setType("image/*");
+                                    intent.setAction("android.intent.action.GET_CONTENT");
+                                    ProfileMenu.this.startActivityForResult(Intent.createChooser(intent, "Select Picture"), 2);
+                                }
+                            });
+                            layout_images.addView(viewimages);
+                        }
                     }
                     child_more_images(layout_images, false);
                     this.addChildresnLayout.addView(view3);
                     this.child_images_count++;
                 }
             }
-            JSONArray pet = response.getJSONObject("pet").getJSONArray("pet");
-            if (pet.length() <= 1) {
-                addPetSLayout(this.petlayoutCount);
-                this.petlayoutCount++;
-                return;
-            }
-            for (int i3 = 0; i3 < pet.length(); i3++) {
-                JSONObject petJson = pet.getJSONObject(i3);
-                View view7 = this.linf.inflate(R.layout.layout_pets, null);
-                ImageView removepetIcon = (ImageView) view7.findViewById(R.id.removepetIcon);
-                removepetIcon.setTag(petJson.getString("pet_id"));
-                if (i3 == 0) {
-                    removepetIcon.setVisibility(View.GONE);
-                    this.petlayoutCount++;
-                }
-                final View view8 = view7;
-                final ImageView imageView5 = removepetIcon;
-                removepetIcon.setOnClickListener(new OnClickListener() {
-                    public void onClick(View v) {
-                        ProfileMenu.this.petLayouts.removeView(view8);
-                        if (ProfileMenu.this.delete_pet.equalsIgnoreCase("")) {
-                            ProfileMenu.this.delete_pet = ProfileMenu.this.delete_pet.concat(imageView5.getTag().toString());
-                            return;
-                        }
-                        ProfileMenu.this.delete_pet = ProfileMenu.this.delete_pet.concat("," + imageView5.getTag().toString());
+            if (response.has("pet")) {
+                JSONArray pet = response.getJSONObject("pet").getJSONArray("pet");
+//                if (pet.length() <= 1) {
+//                    addPetSLayout(this.petlayoutCount);
+//                    this.petlayoutCount++;
+//                    return;
+//                }
+                for (int i3 = 0; i3 < pet.length(); i3++) {
+                    JSONObject petJson = pet.getJSONObject(i3);
+                    View view7 = LayoutInflater.from(this).inflate(R.layout.layout_pets, null);
+                    ImageView removepetIcon = (ImageView) view7.findViewById(R.id.removepetIcon);
+                    removepetIcon.setTag(petJson.getString("pet_id"));
+                    if (i3 == 0) {
+                        removepetIcon.setVisibility(View.GONE);
+                        this.petlayoutCount++;
                     }
-                });
-                ((EditText) view7.findViewById(R.id.edit_petid)).setText(petJson.getString("pet_id"));
-                EditText edit_petname = (EditText) view7.findViewById(R.id.edit_petname);
-                edit_petname.setText(petJson.getString("p_name"));
-                EditText edit_petType = (EditText) view7.findViewById(R.id.edit_petType);
-                edit_petType.setText(petJson.getString("p_type"));
-                EditText edit_petDateOfBirth = (EditText) view7.findViewById(R.id.edit_petDateOfBirth);
-                edit_petDateOfBirth.setText(petJson.getString("p_dob"));
-                EditText edit_petVeterinarian = (EditText) view7.findViewById(R.id.edit_petVeterinarian);
-                edit_petVeterinarian.setText(petJson.getString("p_veterinarian"));
-                EditText edit_petSpecialneeds = (EditText) view7.findViewById(R.id.edit_petSpecialneeds);
-                edit_petSpecialneeds.setText(petJson.getString("p_sepcial_need"));
-                if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
-                    edit_petname.setEnabled(false);
-                    edit_petType.setEnabled(false);
-                    edit_petDateOfBirth.setEnabled(false);
-                    edit_petVeterinarian.setEnabled(false);
-                    edit_petSpecialneeds.setEnabled(false);
+                    final View view8 = view7;
+                    final ImageView imageView5 = removepetIcon;
+                    removepetIcon.setOnClickListener(new OnClickListener() {
+                        public void onClick(View v) {
+                            ProfileMenu.this.petLayouts.removeView(view8);
+                            if (ProfileMenu.this.delete_pet.equalsIgnoreCase("")) {
+                                ProfileMenu.this.delete_pet = ProfileMenu.this.delete_pet.concat(imageView5.getTag().toString());
+                                return;
+                            }
+                            ProfileMenu.this.delete_pet = ProfileMenu.this.delete_pet.concat("," + imageView5.getTag().toString());
+                        }
+                    });
+                    ((EditText) view7.findViewById(R.id.edit_petid)).setText(petJson.getString("pet_id"));
+                    EditText edit_petname = (EditText) view7.findViewById(R.id.edit_petname);
+                    edit_petname.setText(petJson.getString("p_name"));
+                    EditText edit_petType = (EditText) view7.findViewById(R.id.edit_petType);
+                    edit_petType.setText(petJson.getString("p_type"));
+                    EditText edit_petDateOfBirth = (EditText) view7.findViewById(R.id.edit_petDateOfBirth);
+                    edit_petDateOfBirth.setText(petJson.getString("p_dob"));
+                    EditText edit_petVeterinarian = (EditText) view7.findViewById(R.id.edit_petVeterinarian);
+                    edit_petVeterinarian.setText(petJson.getString("p_veterinarian"));
+                    EditText edit_petSpecialneeds = (EditText) view7.findViewById(R.id.edit_petSpecialneeds);
+                    edit_petSpecialneeds.setText(petJson.getString("p_sepcial_need"));
+                    if (this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
+                        edit_petname.setEnabled(false);
+                        edit_petType.setEnabled(false);
+                        edit_petDateOfBirth.setEnabled(false);
+                        edit_petVeterinarian.setEnabled(false);
+                        edit_petSpecialneeds.setEnabled(false);
+                    }
+                    this.petLayouts.addView(view7);
                 }
-                this.petLayouts.addView(view7);
             }
-            JSONObject relationship = json.getJSONObject("relationship");
-            this.relationship_id = relationship.getString("relationship_id").toString();
-            UrlImageViewHelper.setUrlDrawable(this.imgPassport, relationship.getString("s_passport").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgBirthCertificate, relationship.getString("s_birth_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgSIN_SSN, relationship.getString("s_ssn").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgImmigrationPapers, relationship.getString("s_citizen_paper").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWillPowerAttorney, relationship.getString("s_power_attorney").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgTrust, relationship.getString("s_trust").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWarVeteranRecords, relationship.getString("s_war_record").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgOrganDonationRecords, relationship.getString("s_donation_rec").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgMarriageCertificate, relationship.getString("m_marriege_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgPreMarriageAgreements, relationship.getString("m_marriege_agree").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgMaintenanceRecords, relationship.getString("d_maintenance_rec").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgAlimony, relationship.getString("d_alimony").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgChildCustodyRecords, relationship.getString("d_child_custody").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgDivorceDecreeCertificate, relationship.getString("d_divorce_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgSeparationAgreement, relationship.getString("d_sepration_agree").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgDeathCertificate, relationship.getString("w_death_certi").toString(), (int) R.drawable.img);
-            UrlImageViewHelper.setUrlDrawable(this.imgWill, relationship.getString("w_will").toString(), (int) R.drawable.img);
+            if (response.has("relationship")) {
+                JSONObject relationship = response.getJSONObject("relationship").getJSONArray("relationship").getJSONObject(0);
+                this.relationship_id = relationship.getString("relationship_id").toString();
+                if (relationship.has("s_passport")) {
+                    this.imgPassport.setContentDescription(relationship.getString("s_passport"));
+                    this.imgPassport.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgPassport, relationship.getString("s_passport").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_birth_certi")) {
+                    this.imgBirthCertificate.setContentDescription(relationship.getString("s_birth_certi"));
+                    this.imgBirthCertificate.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgBirthCertificate, relationship.getString("s_birth_certi").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_ssn")) {
+                    this.imgSIN_SSN.setContentDescription(relationship.getString("s_ssn"));
+                    this.imgSIN_SSN.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgSIN_SSN, relationship.getString("s_ssn").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_citizen_paper")) {
+                    this.imgImmigrationPapers.setContentDescription(relationship.getString("s_citizen_paper"));
+                    this.imgImmigrationPapers.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgImmigrationPapers, relationship.getString("s_citizen_paper").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_power_attorney")) {
+                    this.imgWillPowerAttorney.setContentDescription(relationship.getString("s_power_attorney"));
+                    this.imgWillPowerAttorney.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgWillPowerAttorney, relationship.getString("s_power_attorney").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_trust")) {
+                    this.imgTrust.setContentDescription(relationship.getString("s_trust"));
+                    this.imgTrust.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgTrust, relationship.getString("s_trust").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_war_record")) {
+                    this.imgWarVeteranRecords.setContentDescription(relationship.getString("s_war_record"));
+                    this.imgWarVeteranRecords.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgWarVeteranRecords, relationship.getString("s_war_record").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("s_donation_rec")) {
+                    this.imgOrganDonationRecords.setContentDescription(relationship.getString("s_donation_rec"));
+                    this.imgOrganDonationRecords.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgOrganDonationRecords, relationship.getString("s_donation_rec").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("m_marriege_certi")) {
+                    this.imgMarriageCertificate.setContentDescription(relationship.getString("m_marriege_certi"));
+                    this.imgMarriageCertificate.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgMarriageCertificate, relationship.getString("m_marriege_certi").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("m_marriege_agree")) {
+                    this.imgPreMarriageAgreements.setContentDescription(relationship.getString("m_marriege_agree"));
+                    this.imgPreMarriageAgreements.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgPreMarriageAgreements, relationship.getString("m_marriege_agree").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("d_maintenance_rec")) {
+                    this.imgMaintenanceRecords.setContentDescription(relationship.getString("d_maintenance_rec"));
+                    this.imgMaintenanceRecords.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgMaintenanceRecords, relationship.getString("d_maintenance_rec").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("d_alimony")) {
+                    this.imgAlimony.setContentDescription(relationship.getString("d_alimony"));
+                    this.imgAlimony.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgAlimony, relationship.getString("d_alimony").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("d_child_custody")) {
+                    this.imgChildCustodyRecords.setContentDescription(relationship.getString("d_child_custody"));
+                    this.imgChildCustodyRecords.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgChildCustodyRecords, relationship.getString("d_child_custody").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("d_divorce_certi")) {
+                    this.imgDivorceDecreeCertificate.setContentDescription(relationship.getString("d_divorce_certi"));
+                    this.imgDivorceDecreeCertificate.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgDivorceDecreeCertificate, relationship.getString("d_divorce_certi").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("d_sepration_agree")) {
+                    this.imgSeparationAgreement.setContentDescription(relationship.getString("d_sepration_agree"));
+                    this.imgSeparationAgreement.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgSeparationAgreement, relationship.getString("d_sepration_agree").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("w_death_certi")) {
+                    this.imgDeathCertificate.setContentDescription(relationship.getString("w_death_certi"));
+                    this.imgDeathCertificate.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgDeathCertificate, relationship.getString("w_death_certi").toString().trim(), (int) R.drawable.img);
+                }
+                if (relationship.has("w_will")) {
+                    this.imgWill.setContentDescription(relationship.getString("w_will"));
+                    this.imgWill.setTag("1");
+                    UrlImageViewHelper.setUrlDrawable(this.imgWill, relationship.getString("w_will").toString().trim(), (int) R.drawable.img);
+                }
+            }
 
         } catch (Exception e) {
             ADDParentToLayout(true);
@@ -1120,5 +1527,78 @@ public class ProfileMenu extends Activity implements OnClickListener, ResponseLi
                 ProfileMenu.this.finish();
             }
         }).show();
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
     }
 }

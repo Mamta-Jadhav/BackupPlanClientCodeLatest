@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.backupplanclientcode.Adapter.ContactsListAdapter;
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.Constant.Constant;
@@ -37,6 +38,7 @@ import com.example.backupplanclientcode.loginActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
 import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
@@ -90,7 +92,7 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
         @SuppressLint({"InlinedApi"})
 
         /* renamed from: pd */
-        ProgressDialog f39pd = new ProgressDialog(ContactListActivity.this, 3);
+                ProgressDialog f39pd = new ProgressDialog(ContactListActivity.this, 3);
 
         public saveContcts() {
         }
@@ -136,8 +138,10 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
 
     /* access modifiers changed from: private */
     public void getPhoneContacts() {
+        Log.d("test", "contactttt");
         try {
             ContentResolver cr = getContentResolver();
+            HashSet<String> mobileNoSet = new HashSet<String>();
             Cursor cur = cr.query(Contacts.CONTENT_URI, null, null, null, "display_name ASC");
             if (cur.getCount() > 0) {
                 while (cur.moveToNext()) {
@@ -147,11 +151,14 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
                         Cursor pCur = cr.query(Phone.CONTENT_URI, null, "contact_id = ?", new String[]{id}, null);
                         while (pCur.moveToNext()) {
                             String phoneNo = pCur.getString(pCur.getColumnIndex("data1"));
-                            if (!this.dbHelper.check_already_contacts(name, phoneNo)) {
+                            phoneNo = phoneNo.replaceAll("\\s", "");
+                            if (!mobileNoSet.contains(phoneNo)) {
+//                            if (!this.dbHelper.check_already_contacts(name, phoneNo)) {
                                 HashMap<String, String> map = new HashMap<>();
                                 map.put("phoneNo", phoneNo);
                                 map.put("Name", name);
                                 map.put("flag", "0");
+                                mobileNoSet.add(phoneNo);
                                 this.contactHasMap.add(map);
                             }
                         }
@@ -159,6 +166,7 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
                     }
                 }
             }
+            Log.d("test", "contactHasMap    " + contactHasMap.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -166,6 +174,7 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
 
     /* access modifiers changed from: private */
     public void show_contact_details() {
+        Log.d("test", contactHasMap.size() + " show_contact_details");
         this.adapter = new ContactsListAdapter(this, this.contactHasMap, false);
         this.adapter.notifyDataSetChanged();
         this.lvContacts.setAdapter(null);
@@ -184,8 +193,10 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
                     map.put("Name", map.get("Name"));
                     if (isChecked) {
                         map.put("flag", "1");
+                        Log.d("test", " 1");
                     } else {
                         map.put("flag", "0");
+                        Log.d("test", " 0");
                     }
                     ContactListActivity.this.contactHasMap.set(i, map);
                 }
@@ -237,20 +248,47 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         int textlength = this.editSearchContact.getText().length();
         this.array_sort.clear();
-        for (int i = 0; i < this.contactHasMap.size(); i++) {
-            if (textlength <= ((String) ((HashMap) this.contactHasMap.get(i)).get("Name")).length() && this.editSearchContact.getText().toString().toLowerCase().contains(((String) ((HashMap) this.contactHasMap.get(i)).get("Name")).subSequence(0, textlength).toString().toLowerCase())) {
-                HashMap<String, String> map = new HashMap<>();
-                map.put("Name", (String) ((HashMap) this.contactHasMap.get(i)).get("Name"));
-                map.put("phoneNo", (String) ((HashMap) this.contactHasMap.get(i)).get("phoneNo"));
-                this.array_sort.add(map);
-            }
-        }
-        if (this.array_sort.size() <= 0) {
-            displayToast("No found any contact");
-        }
+        filter(this.editSearchContact.getText().toString());
+//        for (int i = 0; i < this.contactHasMap.size(); i++) {
+//            if (textlength <= ((String) ((HashMap) this.contactHasMap.get(i)).get("Name")).length() && this.editSearchContact.getText().toString().toLowerCase().contains(((String) ((HashMap) this.contactHasMap.get(i)).get("Name")).subSequence(0, textlength).toString().toLowerCase())) {
+//                HashMap<String, String> map = new HashMap<>();
+//                map.put("Name", (String) ((HashMap) this.contactHasMap.get(i)).get("Name"));
+//                map.put("phoneNo", (String) ((HashMap) this.contactHasMap.get(i)).get("phoneNo"));
+//                this.array_sort.add(map);
+//            }
+//        }
+//        if (this.array_sort.size() <= 0) {
+//            displayToast("No found any contact");
+//        }
     }
 
     public void afterTextChanged(Editable s) {
+    }
+
+    void filter(String text) {
+        //new array list that will hold the filtered data
+//        val list = arrayListOf<ContactModel>()
+
+        //looping through existing elements
+        for (int i = 0; i < contactHasMap.size(); i++) {
+            //if the existing elements contains the search input
+            if (((String) ((HashMap) this.contactHasMap.get(i)).get("Name")).toLowerCase().contains(text.toLowerCase())) {
+                //adding the element to filtered list
+                HashMap<String, String> map = new HashMap<>();
+                map.put("Name", (String) ((HashMap) this.contactHasMap.get(i)).get("Name"));
+                map.put("phoneNo", (String) ((HashMap) this.contactHasMap.get(i)).get("phoneNo"));
+                map.put("flag", (String) ((HashMap) this.contactHasMap.get(i)).get("flag"));
+                this.array_sort.add(map);
+
+            }
+        }
+
+        //calling a method of the adapter class and passing the filtered list
+        if (this.array_sort.size() == 0) {
+            displayToast("No found any contact");
+        } else {
+            adapter.filterList(array_sort);
+        }
     }
 
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -271,17 +309,18 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -290,16 +329,19 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -309,7 +351,6 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -323,15 +364,18 @@ public class ContactListActivity extends Activity implements OnClickListener, Te
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

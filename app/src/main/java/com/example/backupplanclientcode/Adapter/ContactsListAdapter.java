@@ -2,6 +2,7 @@ package com.example.backupplanclientcode.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,11 +52,14 @@ public class ContactsListAdapter extends BaseAdapter {
                 HashMap<String, String> map = (HashMap) ContactsListAdapter.this.contactHasMap.get(position);
                 map.put("phoneNo", map.get("phoneNo"));
                 map.put("Name", map.get("Name"));
+                Log.d("test", map.get("Name"));
                 if (isChecked) {
                     map.put("flag", "1");
+                    Log.d("test", 1+"");
                     ContactsListAdapter.this.dbHelper.save_contact("", tv_contactName.getText().toString().trim(), tv_contactNumber.getText().toString().trim());
                 } else {
                     map.put("flag", "0");
+                    Log.d("test", 0+"");
                     ContactsListAdapter.this.dbHelper.delete_contact(tv_contactNumber.getText().toString().trim());
                 }
                 ContactsListAdapter.this.contactHasMap.set(position, map);
@@ -74,5 +78,11 @@ public class ContactsListAdapter extends BaseAdapter {
 
     public long getItemId(int position) {
         return (long) position;
+    }
+
+    public void filterList(ArrayList<HashMap<String, String>> filterdNames) {
+        Log.d("test", "FilterList Notified..."+filterdNames.size());
+        this.contactHasMap = filterdNames;
+        notifyDataSetChanged();
     }
 }

@@ -30,18 +30,22 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.google.gson.JsonObject;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +63,10 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
-public class InvestmentMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+
+public class InvestmentMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     ImageView addIcon;
@@ -137,6 +144,7 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
             }
         });
         final ImageView imgInvestment = (ImageView) walletView.findViewById(R.id.imgInvestment);
+//        imgInvestment.setTag("1");
         imgInvestment.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 InvestmentMenu.this.currentImageVew = imgInvestment;
@@ -229,19 +237,6 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
             int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             Log.d("test", cursor.getString(nameIndex));
-//            Log.d("test", getRealPathFromURI(imageUri));
-            //            try {
-//                String[] proj = { MediaStore.Images.Media.DATA };
-//                cursor = getContentResolver().query(imageUri,  proj, null, null, null);
-//                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//                cursor.moveToFirst();
-//            Log.d("test", cursor.getString(column_index) + "");
-//            } finally {
-//                if (cursor != null) {
-//                    cursor.close();
-//                }
-//            }
-//            this.currentImageVew = cursor.getString(nameIndex);
             this.currentImageVew.setImageBitmap(selectedImage);
             this.currentImageVew.setContentDescription(cursor.getString(nameIndex));
             Log.d("test", "selectedImage "+selectedImage);
@@ -260,6 +255,7 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
         }
     }
 
@@ -291,14 +287,31 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
                 json.put("benificial", edit_Benificery.getText().toString().trim());
                 json.put("year_purchase", edit_yearPurchase.getText().toString().trim());
                 if (!imgInvestment.getContentDescription().toString().trim().isEmpty()) {
-                    json.put("photo", "photo.png");
-                    File file = new File(imgInvestment.getContentDescription().toString());
-                    entity.addPart("photo[]",  new FileBody(file));
+                    String[] arr = imgInvestment.getContentDescription().toString().split("/");
+                    String atr = arr[arr.length - 1];
+                    json.put("photo", atr);
+
+                    if (imgInvestment.getTag().toString().equalsIgnoreCase("1")) {
+//                        URL domain = new URL(imgInvestment.getContentDescription().toString());
+//                        String destFolder = getCacheDir().getAbsolutePath();
+//                        FileOutputStream out = new FileOutputStream(destFolder + "/" + atr);
+//                        Log.d("test", "Path : " + domain.toURI().getPath());
+//                        entity.addPart("photo[]", new FileBody(new File(destFolder + "/" + atr)));
+                        json.put("is_file", 0);
+                    } else {
+                        json.put("is_file", 1);
+                        entity.addPart("photo[]", new FileBody(new File(imgInvestment.getContentDescription().toString())));
+                        Log.i("imgInvestment", imgInvestment.getContentDescription().toString());
+                    }
+
+
+                    // File file = new File(imgInvestment.getContentDescription().toString());
+                    //  entity.addPart("photo[]",  new FileBody(file));
 //                    nameValuePairs.add(new BasicNameValuePair("photo" + i, new FileBody(new File(imgInvestment.getContentDescription().toString())).getFile().getAbsolutePath()));
                     nameValuePairs.add(new BasicNameValuePair("photo", imgInvestment.getContentDescription().toString()));
-                    Log.i("imgInvestment", imgInvestment.getContentDescription().toString());
                 } else {
                     json.put("photo", "");
+                    json.put("is_file", 0);
                 }
                 jsonArray.put(json);
             }
@@ -311,7 +324,7 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
             } else if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
                 nameValuePairs.add(new BasicNameValuePair("json_data", investment_data.toString()));
                 entity.addPart("json_data", new StringBody(investment_data.toString()));
-                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.edit_investment, nameValuePairs);
+                SaveProfileAsytask saveProfileAsytask = new SaveProfileAsytask(this, ServiceUrl.edit_investment, entity);
                 saveProfileAsytask.execute(new Void[0]);
             } else {
                 nameValuePairs.add(new BasicNameValuePair("json_data", investment_data.toString()));
@@ -399,6 +412,8 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
                 final ImageView imgInvestment = (ImageView) investment.findViewById(R.id.imgInvestment);
                 if (json.has("photo")) {
                     UrlImageViewHelper.setUrlDrawable(imgInvestment, json.getString("photo").toString().trim(), (int) R.drawable.img);
+                    imgInvestment.setContentDescription(json.getString("photo").toString().trim());
+                    imgInvestment.setTag("1");
                     imgInvestment.setOnClickListener(new OnClickListener() {
                         public void onClick(View v) {
                             InvestmentMenu.this.currentImageVew = imgInvestment;
@@ -424,6 +439,79 @@ public class InvestmentMenu extends Activity implements OnClickListener, Respons
         } catch (Exception e) {
             addInvestmentLayout();
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+            //redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+            //redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

@@ -69,7 +69,7 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
     }
 
     private void checkAlredySaveAccount() {
-//        if (this.pref.getStringValue(Constant.RetirementFlag, "").equalsIgnoreCase("1")) {
+        if (this.pref.getStringValue(Constant.RetirementFlag, "").equalsIgnoreCase("1")) {
         this.btn_save.setText("Edit");
         if (!this.pref.getBooleanValue(Constant.isGuestLogin, false)) {
             this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_Retirement));
@@ -77,7 +77,7 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
         if (this.connection.isConnectingToInternet()) {
             try {
                 JSONObject nameValuePair = new JSONObject();
-                nameValuePair.put("user_id", "2");//this.pref.getStringValue(Constant.user_id, ""));
+                nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                 nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                 new GeneralTask(this, ServiceUrl.get_retirement_detail, nameValuePair, 2, "post").execute(new Void[0]);
             } catch (Exception e) {
@@ -87,9 +87,9 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
         displayMessage(getResources().getString(R.string.connectionFailMessage));
         show_all_layouts();
         return;
-//        }
-//        this.actionBarTittle.setText(getResources().getString(R.string.menu_Retirement));
-//        show_all_layouts();
+        }
+        this.actionBarTittle.setText(getResources().getString(R.string.menu_Retirement));
+        show_all_layouts();
     }
 
     private void show_all_layouts() {
@@ -653,17 +653,18 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -672,16 +673,19 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -691,7 +695,6 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -705,15 +708,18 @@ public class RetirementMenuActivity extends Activity implements OnClickListener,
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

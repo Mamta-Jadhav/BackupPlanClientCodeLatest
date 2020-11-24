@@ -115,7 +115,7 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
                 this.actionBarTittle.setText("Edit " + getResources().getString(R.string.menu_contacts));
                 try {
                     JSONObject nameValuePair = new JSONObject();
-                    nameValuePair.put("user_id", "23");//this.pref.getStringValue(Constant.user_id, ""));
+                    nameValuePair.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
                     nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
                     new GeneralTask(this, ServiceUrl.get_contact_detail, nameValuePair, 2, "post").execute(new Void[0]);
                 } catch (Exception e) {
@@ -206,7 +206,7 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
                 jsonbj2.put("contact_number", edit_contact2.getText().toString().trim());
                 contact.put(jsonbj2);
             }
-            contact_data.put("user_id", "23");//this.pref.getStringValue(Constant.user_id, ""));
+            contact_data.put("user_id", this.pref.getStringValue(Constant.user_id, ""));
             contact_data.put("delete_contact", this.delete_contact);
             contact_data.put("contact", contact);
             MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -214,7 +214,7 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
             JSONObject sendJson = new JSONObject();
 
             sendJson.put("contact_data", contact_data);
-//            entity.addPart("json_data", new StringBody(sendJson.toString()));
+            entity.addPart("json_data", new StringBody(sendJson.toString()));
 //            FormBodyPart bodyPart = new FormBodyPart("json_data", new StringBody(contact_data.toString()));
 //            entity.addPart(bodyPart);
 
@@ -235,15 +235,14 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
 //            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "multipart/form-data"));
 //            new PostData().execute(sendJson.toString());
 
-
             Log.e("sendJson", sendJson.toString());
             if (!this.connection.isConnectingToInternet()) {
                 return;
             }
             if (this.pref.getStringValue(Constant.contactFlag, "").equalsIgnoreCase("1")) {
-                new SaveProfileAsytask(this, ServiceUrl.edit_contact, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.edit_contact, entity).execute(new Void[0]);
             } else {
-                new SaveProfileAsytask(this, ServiceUrl.save_contact, nameValuePairs).execute(new Void[0]);
+                new SaveProfileAsytask(this, ServiceUrl.save_contact, entity).execute(new Void[0]);
 //                JSONObject nameValuePair = new JSONObject();
 //                nameValuePair.put("json_data", contact_data);//this.pref.getStringValue(Constant.user_id, ""));
 ////                nameValuePair.put("token", this.pref.getStringValue(Constant.jwttoken, ""));
@@ -339,17 +338,18 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
     @Override
     public void doLogout() {
 
-        if(foreGround){
+        if (foreGround) {
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
 
-        }else {
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
             logout = "true";
         }
-
     }
 
     @Override
@@ -358,16 +358,19 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "OnStart () &&& Starting timer");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
 
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 
@@ -377,7 +380,6 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
         LogOutTimerUtil.startLogoutTimer(this, this);
         Log.e("TAG", "User interacting with screen");
     }
-
 
     @Override
     protected void onPause() {
@@ -391,15 +393,18 @@ public class ContactsMenuActivity extends Activity implements OnClickListener, R
 
         Log.e("TAG", "onResume()");
 
-        if(logout.equals("true")){
+        if (logout.equals("true")) {
 
             logout = "false";
 
-            //redirect user to login screen
+//redirect user to login screen
             pref.setBooleanValue(Constant.isLogin, false);
             pref.setBooleanValue(Constant.isGuestLogin, false);
-            startActivity(new Intent(getApplicationContext(), loginActivity.class));
-            finish();
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

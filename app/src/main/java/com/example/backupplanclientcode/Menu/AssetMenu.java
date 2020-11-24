@@ -30,10 +30,12 @@ import com.example.backupplanclientcode.Asyntask.SaveProfileAsytask.ResponseList
 import com.example.backupplanclientcode.Bugsense.Bugsense;
 import com.example.backupplanclientcode.ConnectionDetector;
 import com.example.backupplanclientcode.Constant.Constant;
+import com.example.backupplanclientcode.LogOutTimerUtil;
 import com.example.backupplanclientcode.Preference.SettingPreference;
 import com.example.backupplanclientcode.R;
 import com.example.backupplanclientcode.ServiceUrl.ServiceUrl;
 import com.example.backupplanclientcode.Utility.CompressImage;
+import com.example.backupplanclientcode.loginActivity;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import java.io.ByteArrayOutputStream;
@@ -54,7 +56,13 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class AssetMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General {
+import static com.example.backupplanclientcode.LogOutTimerUtil.foreGround;
+import static com.example.backupplanclientcode.LogOutTimerUtil.logout;
+//implement logout code
+//share latest APk to hina
+//profile code image wala
+
+public class AssetMenu extends Activity implements OnClickListener, ResponseListerProfile, ResponseListener_General, LogOutTimerUtil.LogOutListener {
     private static final int SELECT_PICTURE = 1;
     TextView actionBarTittle;
     ImageView addAutoIcon;
@@ -192,10 +200,10 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 e.printStackTrace();
             }
             this.currentImageVew.setContentDescription(finalFile.getPath());
+            this.currentImageVew.setTag("0");
 
             Log.d("test", "selectedImage " + selectedImage);
             Log.d("test", "imageUri.getPath() " + imageUri.getPath());
-
         }
     }
 
@@ -364,10 +372,13 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
             List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
             nameValuePairs.add(new BasicNameValuePair("json_data", sendAssetJson.toString()));
             for (int i = 0; i < this.list_images.size(); i++) {
-                entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
-                nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
-                Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
-                Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                if (this.list_images.get(i).get("tag").toString().equalsIgnoreCase("1")) {
+                } else {
+                    entity.addPart((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))));
+                    nameValuePairs.add(new BasicNameValuePair((String) ((HashMap) this.list_images.get(i)).get("image_name"), new FileBody(new File((String) ((HashMap) this.list_images.get(i)).get("image_path"))).getFilename()));
+                    Log.i("file parameter", ((String) ((HashMap) this.list_images.get(i)).get("image_name")).toString());
+                    Log.i("file path", ((String) ((HashMap) this.list_images.get(i)).get("image_path")).toString());
+                }
             }
             if (this.btn_save.getText().toString().trim().equalsIgnoreCase("edit")) {
                 new SaveProfileAsytask(this, ServiceUrl.edit_assets, entity).execute(new Void[0]);
@@ -395,13 +406,20 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 ImageView img_boat = (ImageView) view.findViewById(R.id.img_boat);
                 if (img_boat.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("b_photo", "");
+                    jsonbj.put("is_file", 0);
                 } else {
                     String[] arr = img_boat.getContentDescription().toString().split("/");
                     String atr = arr[arr.length - 1];
                     jsonbj.put("b_photo", atr);
+                    if (img_boat.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_boat.getContentDescription().toString());
                     item_map.put("image_name", "b_photo[]");
+                    item_map.put("tag", img_boat.getTag().toString());
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("boat_id", edit_boat_id.getText().toString().trim());
@@ -434,13 +452,20 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 ImageView img_auto = (ImageView) view.findViewById(R.id.img_auto);
                 if (img_auto.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("a_photo", "");
+                    jsonbj.put("is_file", 0);
                 } else {
                     String[] arr = img_auto.getContentDescription().toString().split("/");
                     String atr = arr[arr.length - 1];
                     jsonbj.put("a_photo", atr);
+                    if (img_auto.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_auto.getContentDescription().toString());
                     item_map.put("image_name", "a_photo[]");
+                    item_map.put("tag", img_auto.getTag().toString());
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("autos_id", edit_boat_id.getText().toString().trim());
@@ -473,13 +498,20 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                 ImageView img_realEstate = (ImageView) view.findViewById(R.id.img_realEstate);
                 if (img_realEstate.getContentDescription().toString().isEmpty()) {
                     jsonbj.put("r_photo", "");
+                    jsonbj.put("is_file", 0);
                 } else {
                     String[] arr = img_realEstate.getContentDescription().toString().split("/");
                     String atr = arr[arr.length - 1];
                     jsonbj.put("r_photo", atr);
+                    if (img_realEstate.getTag().toString().equalsIgnoreCase("1")) {
+                        jsonbj.put("is_file", 0);
+                    } else {
+                        jsonbj.put("is_file", 1);
+                    }
                     HashMap<String, String> item_map = new HashMap<>();
                     item_map.put("image_path", img_realEstate.getContentDescription().toString());
                     item_map.put("image_name", "r_photo[]");
+                    item_map.put("tag", img_realEstate.getTag().toString());
                     this.list_images.add(item_map);
                 }
                 jsonbj.put("real_estate_id", edit_realEstateId.getText().toString().trim());
@@ -520,7 +552,7 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
         try {
             JSONArray asset_detail = response.getJSONObject("autos").getJSONArray("autos");
             if (asset_detail.length() < 1) {
-                addRealEstatelayout();
+//                addRealEstatelayout();
                 return;
             }
             for (int i = 0; i < asset_detail.length(); i++) {
@@ -538,6 +570,8 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                     }
                 });
                 UrlImageViewHelper.setUrlDrawable(img_auto, json.getString("a_photo").toString().trim(), (int) R.drawable.img);
+                img_auto.setContentDescription(json.getString("a_photo").toString());
+                img_auto.setTag("1");
                 removeIcon.setTag(json.getString("auto_id").toString().trim());
                 final ImageView imageView = removeIcon;
                 removeIcon.setOnClickListener(new OnClickListener() {
@@ -583,7 +617,7 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
         try {
             JSONArray asset_detail = response.getJSONObject("boat").getJSONArray("boat");
             if (asset_detail.length() < 1) {
-                addRealEstatelayout();
+//                addRealEstatelayout();
                 return;
             }
             for (int i = 0; i < asset_detail.length(); i++) {
@@ -601,6 +635,8 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                     }
                 });
                 UrlImageViewHelper.setUrlDrawable(img_boat, json.getString("b_photo").toString().trim(), (int) R.drawable.img);
+                img_boat.setContentDescription(json.getString("b_photo").toString());
+                img_boat.setTag("1");
                 removeIcon.setTag(json.getString("boat_id").toString().trim());
                 final ImageView imageView = removeIcon;
                 removeIcon.setOnClickListener(new OnClickListener() {
@@ -659,6 +695,8 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
                     }
                 });
                 UrlImageViewHelper.setUrlDrawable(img_realEstate, json.getString("r_photo").toString().trim(), (int) R.drawable.img);
+                img_realEstate.setContentDescription(json.getString("r_photo").toString());
+                img_realEstate.setTag("1");
                 removeIcon.setTag(json.getString("real_estate_id").toString().trim());
                 final View view = realEstateView;
                 final ImageView imageView = removeIcon;
@@ -697,6 +735,78 @@ public class AssetMenu extends Activity implements OnClickListener, ResponseList
         } catch (Exception e) {
             addRealEstatelayout();
             e.printStackTrace();
+        }
+    }
+    @Override
+    public void doLogout() {
+
+        if (foreGround) {
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        } else {
+            logout = "true";
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "OnStart () &&& Starting timer");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
+        }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        LogOutTimerUtil.startLogoutTimer(this, this);
+        Log.e("TAG", "User interacting with screen");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("TAG", "onPause()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.e("TAG", "onResume()");
+
+        if (logout.equals("true")) {
+
+            logout = "false";
+
+//redirect user to login screen
+            pref.setBooleanValue(Constant.isLogin, false);
+            pref.setBooleanValue(Constant.isGuestLogin, false);
+
+            Intent intent = new Intent(this, loginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            this.finish();
         }
     }
 }

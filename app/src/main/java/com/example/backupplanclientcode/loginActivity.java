@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
@@ -109,8 +110,8 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
                     this.edit_password.setError("Field is required");
                     return;
                 } else if (this.connection.isConnectingToInternet()) {
-                   try {
-                       JSONObject nameValuePairs = new JSONObject();
+                    try {
+                        JSONObject nameValuePairs = new JSONObject();
 //                    nameValuePairs.add(new BasicNameValuePair("username", this.edit_username.getText().toString().trim()));
 //                    nameValuePairs.add(new BasicNameValuePair("password", this.edit_password.getText().toString().trim()));
 //                    if (this.pref.getBooleanValue(Constant.isNotification, false)) {
@@ -123,27 +124,27 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
 //                    nameValuePairs.add(new BasicNameValuePair("device_type", "1"));
 //                    nameValuePairs.add(new BasicNameValuePair("is_guest", "0"));
 //                    nameValuePairs.add(new BasicNameValuePair("device", "android"));
-                       nameValuePairs.put("username", this.edit_username.getText().toString().trim());
-                       nameValuePairs.put("password", this.edit_password.getText().toString().trim());
-                       if (this.pref.getBooleanValue(Constant.isNotification, false)) {
-                           nameValuePairs.put("notification_flag", "1");
-                       } else {
-                           nameValuePairs.put("notification_flag", "0");
-                       }
-                       nameValuePairs.put("token", YourBackupPlanApp.GetDeviceID(getApplicationContext()));
-                       nameValuePairs.put("register_id", "2");// this.pref.getStringValue("gcm_registration_id", "")));
-                       nameValuePairs.put("device_type", "1");
-                       nameValuePairs.put("is_guest", "0");
-                       nameValuePairs.put("device", "android");
-                       this.mNameValuePairs = null;
-                       this.mNameValuePairs = nameValuePairs;
-                       Log.e("token", YourBackupPlanApp.GetDeviceID(getApplicationContext()).toString());
-                       Log.e("register_id ", this.pref.getStringValue("gcm_registration_id", ""));
-                       new GeneralTask(this, ServiceUrl.login, nameValuePairs, 1, "post").execute(new Void[0]);
-                   }catch (Exception e){
-                       Log.d("test", "Error in login JsonObject");
-                   }
-                   return;
+                        nameValuePairs.put("username", this.edit_username.getText().toString().trim());
+                        nameValuePairs.put("password", this.edit_password.getText().toString().trim());
+                        if (this.pref.getBooleanValue(Constant.isNotification, false)) {
+                            nameValuePairs.put("notification_flag", "1");
+                        } else {
+                            nameValuePairs.put("notification_flag", "0");
+                        }
+                        nameValuePairs.put("token", YourBackupPlanApp.GetDeviceID(getApplicationContext()));
+                        nameValuePairs.put("register_id", "2");// this.pref.getStringValue("gcm_registration_id", "")));
+                        nameValuePairs.put("device_type", "1");
+                        nameValuePairs.put("is_guest", "0");
+                        nameValuePairs.put("device", "android");
+                        this.mNameValuePairs = null;
+                        this.mNameValuePairs = nameValuePairs;
+                        Log.e("token", YourBackupPlanApp.GetDeviceID(getApplicationContext()).toString());
+                        Log.e("register_id ", this.pref.getStringValue("gcm_registration_id", ""));
+                        new GeneralTask(this, ServiceUrl.login, nameValuePairs, 1, "post").execute(new Void[0]);
+                    } catch (Exception e) {
+                        Log.d("test", "Error in login JsonObject");
+                    }
+                    return;
                 } else {
                     Toast.makeText(getApplicationContext(), getResources().getString(R.string.connectionFailMessage), Toast.LENGTH_SHORT).show();
                     return;
@@ -163,8 +164,16 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        this.pref.setStringValue(Constant.jwttoken, "");
+        this.pref.setStringValue(Constant.guestCount, "0");
+    }
+
     private void displayToast(String msg) {
-        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
     public void on_GeneralSuccess(JSONObject response, int responseCode) {
@@ -172,7 +181,7 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
             Log.d("~~~~~~~~~~~~>", "" + responseCode + " | " + response.toString());
             if (responseCode == 1) {
                 if (response.getString("success").equalsIgnoreCase("1")) {
-                    displayToast(response.getString("message"));
+//                    displayToast(response.getString("message"));
 //                    openLoginVerification();
                     saveUserInfo(response);
                     return;
@@ -181,12 +190,12 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
             } else if (responseCode != 2) {
             } else {
                 if (response.has("message")) {
-                    displayToast(response.getString("message"));
+//                    displayToast(response.getString("message"));
                     saveUserInfo(response);
                     return;
                 }
                 displayToast(response.getString("error"));
-                openLoginVerification();
+//                openLoginVerification();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -203,7 +212,7 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
                     nameValuePairs.put("login_code", verificationCode);
                     nameValuePairs.put("device", "android");
                     new GeneralTask(loginActivity.this, ServiceUrl.login_verification, nameValuePairs, 2, "post").execute(new Void[0]);
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.d("test", "Error in login_verificaton JsonObject");
                 }
             }
@@ -214,7 +223,7 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
 
         this.pref.setStringValue(Constant.jwttoken, response.getString("jwttoken").trim());
 
-        Log.e("token..........",response.getString("jwttoken").trim());
+        Log.e("token..........", response.getString("jwttoken").trim());
 
         JSONObject login_detail = response.getJSONObject("login_detail");
         this.pref.setStringValue(Constant.user_name, login_detail.getString("username").trim());
@@ -226,16 +235,19 @@ public class loginActivity extends FragmentActivity implements OnClickListener, 
         this.pref.setStringValue(Constant.document_id, login_detail.getString("document_id"));
         this.pref.setStringValue(Constant.accountFlag, login_detail.getString("account_flag"));
         this.pref.setStringValue(Constant.assetFlag, login_detail.getString("assets_flag"));
+        this.pref.setStringValue(Constant.WillsId, login_detail.getString("wills_id"));
         this.pref.setStringValue(Constant.investmentFlag, login_detail.getString("investment_flag"));
         this.pref.setStringValue(Constant.MortgageLoansFlag, login_detail.getString("loan_flag"));
         this.pref.setStringValue(Constant.medical_id, login_detail.getString("medical_id"));
         this.pref.setStringValue(Constant.internet_id, login_detail.getString("internet_id"));
-//        this.pref.setStringValue(Constant.RetirementFlag, login_detail.getString("retirement_flag"));
+        this.pref.setStringValue(Constant.RetirementFlag, login_detail.getString("retirement_flag"));
         this.pref.setStringValue(Constant.employer_id, login_detail.getString("employer_id"));
         this.pref.setStringValue(Constant.insurance_id, login_detail.getString("insurance_id"));
         this.pref.setStringValue(Constant.billToPay, login_detail.getString("bills_to_pay_flag"));
+        this.pref.setStringValue(Constant.contactFlag, login_detail.getString("contact_flag"));
         this.pref.setStringValue(Constant.emergencyFlag, login_detail.getString("emergency_flag"));
         this.pref.setBooleanValue(Constant.isLogin, true);
+        this.pref.setBooleanValue(Constant.isGuestLogin, false);
         this.pref.setBooleanValue(Constant.showAlertFirstTime, true);
         this.pref.setStringValue(Constant.subscription, "free");// login_detail.getString("subscription"));
         try {
